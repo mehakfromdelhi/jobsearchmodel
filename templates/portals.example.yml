@@ -1,0 +1,75 @@
+# Business-role starter scanner config
+# Public template fallback for users who want to edit directly instead of using `npm run refresh-search`.
+
+discovery:
+  mode: "hybrid"
+  auto_promote_companies: true
+
+platforms:
+  priority:
+    - "greenhouse"
+    - "ashby"
+    - "lever"
+    - "smartrecruiters"
+    - "icims"
+    - "workday"
+    - "websearch"
+  enabled:
+    greenhouse: true
+    ashby: true
+    lever: true
+    smartrecruiters: true
+    icims: true
+    workday: true
+    websearch: true
+
+freshness:
+  max_age_days: 5
+  on_missing_date: "review"
+
+relevance:
+  title_weight: 0.25
+  jd_weight: 0.75
+  title_filter:
+    suppress_only: true
+    negative:
+      - "Intern"
+      - "Junior"
+      - "Software Engineer"
+      - "Account Executive"
+  keyword_profiles:
+    business_roles:
+      - "strategy"
+      - "operations"
+      - "business operations"
+      - "program management"
+      - "go-to-market"
+      - "revenue operations"
+      - "strategic finance"
+      - "financial modeling"
+      - "capacity planning"
+      - "portfolio management"
+      - "enablement"
+
+location:
+  priority_hubs:
+    high:
+      - "San Francisco"
+      - "New York"
+    medium:
+      - "Bay Area"
+      - "Remote - San Francisco"
+      - "Remote - New York"
+
+search_queries:
+  - name: "Greenhouse - business roles"
+    platform: "greenhouse"
+    query: 'site:boards.greenhouse.io OR site:job-boards.greenhouse.io ("strategy" OR "business operations" OR "program management" OR "strategic finance" OR "revenue operations") ("San Francisco" OR "New York" OR remote)'
+    enabled: true
+
+  - name: "Ashby - business roles"
+    platform: "ashby"
+    query: 'site:jobs.ashbyhq.com ("strategy" OR "business operations" OR "program management" OR "strategic finance" OR "revenue operations") ("San Francisco" OR "New York" OR remote)'
+    enabled: true
+
+tracked_companies: []

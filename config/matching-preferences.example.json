@@ -1,0 +1,50 @@
+{
+  "targetFunctions": [
+    "Strategy & Operations",
+    "GTM / Revenue Operations",
+    "Program Management"
+  ],
+  "preferredLocations": [
+    "San Francisco",
+    "New York"
+  ],
+  "includeRemote": true,
+  "industriesOfInterest": [
+    "B2B SaaS",
+    "Healthtech",
+    "Fintech"
+  ],
+  "companiesOfInterest": [],
+  "positiveKeywords": [
+    "strategy",
+    "operations",
+    "business operations",
+    "program management",
+    "go-to-market",
+    "revenue operations",
+    "strategic finance",
+    "financial modeling",
+    "capacity planning",
+    "portfolio management",
+    "enablement",
+    "cross-functional"
+  ],
+  "negativeKeywords": [
+    "intern",
+    "junior",
+    "software engineer",
+    "account executive",
+    "sales development"
+  ],
+  "conceptMatches": [
+    "business planning",
+    "KPI ownership",
+    "stakeholder management",
+    "dashboards",
+    "budget ownership",
+    "execution cadence",
+    "cross-functional alignment"
+  ],
+  "dashboardPreference": "local-only",
+  "freshnessDays": 5
+}

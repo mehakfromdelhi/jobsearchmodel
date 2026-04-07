@@ -1,0 +1,47 @@
+# Mehak's Job Search Model profile template
+
+candidate:
+  full_name: "Alex Candidate"
+  email: "alex@example.com"
+  phone: ""
+  location: "San Francisco, CA"
+  linkedin: ""
+  portfolio_url: ""
+  github: ""
+  twitter: ""
+
+target_roles:
+  primary:
+    - "Strategy & Operations"
+    - "GTM / Revenue Operations"
+  archetypes:
+    - name: "Strategy & Operations"
+      level: "Mid-Senior"
+      fit: "primary"
+    - name: "Program Management"
+      level: "Mid-Senior"
+      fit: "secondary"
+    - name: "Strategic Finance"
+      level: "Mid-Senior"
+      fit: "adjacent"
+
+narrative:
+  headline: "Business-role candidate focused on structured problem solving and execution"
+  exit_story: "Replace this with your own career narrative and why you are pursuing these roles."
+  superpowers:
+    - "Structured problem solving"
+    - "Cross-functional execution"
+    - "Clear communication"
+  proof_points: []
+
+compensation:
+  target_range: ""
+  currency: "USD"
+  minimum: ""
+  location_flexibility: ""
+
+location:
+  country: "United States"
+  city: "San Francisco"
+  timezone: "America/New_York"
+  visa_status: ""

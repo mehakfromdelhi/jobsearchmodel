@@ -1,0 +1,28 @@
+{
+  "name": "mehaks-job-search-model",
+  "version": "1.0.0",
+  "description": "Public, self-serve job search template for business roles built on Claude Code",
+  "scripts": {
+    "onboard": "node onboard.mjs",
+    "refresh-search": "node generate-search-config.mjs",
+    "verify": "node verify-pipeline.mjs",
+    "normalize": "node normalize-statuses.mjs",
+    "dedup": "node dedup-tracker.mjs",
+    "merge": "node merge-tracker.mjs",
+    "pdf": "node generate-pdf.mjs",
+    "sync-check": "node cv-sync-check.mjs",
+    "resume": "node select-resume.mjs",
+    "sync-dashboard": "node sync-dashboard.mjs"
+  },
+  "keywords": ["job-search", "claude-code", "business-roles", "resume", "ats", "career"],
+  "author": "Mehak Bhatia",
+  "homepage": "https://github.com/mehakfromdelhi/jobsearchmodel",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mehakfromdelhi/jobsearchmodel.git"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "playwright": "^1.58.1"
+  }
+}
