@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# career-ops batch runner — standalone orchestrator for claude -p workers
+# Mehak's Job Search Model batch runner — standalone orchestrator for claude -p workers
 # Reads batch-input.tsv, delegates each offer to a claude -p worker,
 # tracks state in batch-state.tsv for resumability.
 
@@ -26,7 +26,7 @@ MAX_RETRIES=2
 
 usage() {
   cat <<'USAGE'
-career-ops batch runner — process job offers in batch via claude -p workers
+Mehak's Job Search Model batch runner — process job offers in batch via claude -p workers
 Uses your default Claude model (Claude Max subscription).
 
 Usage: batch-runner.sh [OPTIONS]
@@ -289,10 +289,10 @@ process_offer() {
 merge_tracker() {
   echo ""
   echo "=== Merging tracker additions ==="
-  node "$PROJECT_DIR/career-ops/merge-tracker.mjs"
+  node "$PROJECT_DIR/merge-tracker.mjs"
   echo ""
   echo "=== Verifying pipeline integrity ==="
-  node "$PROJECT_DIR/career-ops/verify-pipeline.mjs" || echo "⚠️  Verification found issues (see above)"
+  node "$PROJECT_DIR/verify-pipeline.mjs" || echo "⚠️  Verification found issues (see above)"
 }
 
 # Print summary
@@ -352,7 +352,7 @@ main() {
     exit 0
   fi
 
-  echo "=== career-ops batch runner ==="
+  echo "=== Mehak's Job Search Model batch runner ==="
   echo "Parallel: $PARALLEL | Max retries: $MAX_RETRIES"
   echo "Input: $total_input offers"
   echo ""

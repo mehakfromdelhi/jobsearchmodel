@@ -41,6 +41,4 @@ npm run refresh-search
 
 3. Run your next scan
 
-```bash
-/career-ops scan
-```
+Ask Claude Code to run a job scan.

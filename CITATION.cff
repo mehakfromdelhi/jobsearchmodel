@@ -1,19 +1,17 @@
 cff-version: 1.2.0
-message: "If you use career-ops, please cite it using these metadata."
-title: "Career-Ops: AI-Powered Job Search Pipeline"
+message: "If you use Mehak's Job Search Model, please cite it using these metadata."
+title: "Mehak's Job Search Model"
 type: software
 authors:
-  - family-names: "Fernández de Valderrama"
-    given-names: "Santiago"
-    website: "https://santifer.io"
-url: "https://santifer.io"
-repository-code: "https://github.com/santifer/career-ops"
+  - family-names: "Bhatia"
+    given-names: "Mehak"
+url: "https://github.com/mehakfromdelhi/jobsearchmodel"
+repository-code: "https://github.com/mehakfromdelhi/jobsearchmodel"
 license: MIT
 keywords:
-  - ai
   - job-search
   - claude-code
-  - career
-  - automation
-  - llmops
-  - go-tui
+  - business-roles
+  - strategy-and-operations
+  - gtm
+  - program-management

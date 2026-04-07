@@ -46,10 +46,8 @@ After onboarding, the default workflow is:
 
 Typical commands:
 
-```bash
-/career-ops scan
-node sync-dashboard.mjs --target=sheets
-```
+- Ask Claude Code to run a job scan
+- Run `node sync-dashboard.mjs --target=sheets`
 
 ## Updating your setup later
 

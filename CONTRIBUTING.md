@@ -1,65 +1,35 @@
-# Contributing to Career-Ops
+# Contributing to Mehak's Job Search Model
 
-Thanks for your interest in contributing! Career-Ops is built with Claude Code, and you can use it for development too.
+Thanks for your interest in contributing. This repo is a public Claude Code template for business-role job seekers.
 
-## Before Submitting a PR
+## Before submitting a PR
 
-**Please open an issue first to discuss the change you'd like to make.** This helps us align on direction before you invest time coding.
+Please open an issue first to discuss the change you want to make. This keeps the template focused and avoids accidental drift away from the business-role use case.
 
-PRs without a corresponding issue may be closed if they don't align with the project's architecture or goals.
+## Good contributions
 
-### What makes a good PR
-- Fixes a bug listed in Issues
-- Addresses a feature request that was discussed and approved
-- Includes a clear description of what changed and why
-- Follows the existing code style and project philosophy (simple, minimal, quality over quantity)
-
-## Quick Start
-
-1. Open an issue to discuss your idea
-2. Fork the repo
-3. Create a branch (`git checkout -b feature/my-feature`)
-4. Make your changes
-5. Test with a fresh clone (see [docs/SETUP.md](docs/SETUP.md))
-6. Commit and push
-7. Open a Pull Request referencing the issue
-
-## What to Contribute
-
-**Good first contributions:**
-- Add companies to `templates/portals.example.yml`
-- Translate modes to other languages
-- Improve documentation
-- Add example CVs for different roles (in `examples/`)
-- Report bugs via [Issues](https://github.com/santifer/career-ops/issues)
-
-**Bigger contributions:**
-- New evaluation dimensions or scoring logic
-- Dashboard TUI features (in `dashboard/`)
-- New skill modes (in `modes/`)
-- Script improvements (`.mjs` utilities)
+- improve onboarding or setup docs
+- improve business-role matching defaults
+- improve dashboard sync guidance
+- add better examples for strategy, ops, GTM, program, or strategic finance users
+- fix bugs in the scripts or template flow
 
 ## Guidelines
 
-- Keep modes language-agnostic when possible (Claude handles both EN and ES)
-- Scripts should handle missing files gracefully (check `existsSync` before `readFileSync`)
-- Dashboard changes require `go build` — test with real data before submitting
-- Don't commit personal data (cv.md, profile.yml, applications.md, reports/)
+- keep the public experience beginner-friendly
+- avoid committing personal files like `cv.md`, `.env`, `profile.yml`, tracker data, or generated reports
+- prefer business-role defaults over generic all-career abstractions in v1
+- test changes from a fresh clone when possible
 
 ## Development
 
 ```bash
-# Scripts
-node verify-pipeline.mjs     # Health check
-node cv-sync-check.mjs        # Config check
-
-# Dashboard
-cd dashboard && go build -o career-dashboard .
-./career-dashboard --path .
+node cv-sync-check.mjs
+node verify-pipeline.mjs
 ```
 
-## Need Help?
+## Help
 
-- [Open an issue](https://github.com/santifer/career-ops/issues)
-- [Read the architecture docs](docs/ARCHITECTURE.md)
-- Built by [santifer](https://santifer.io)
+- open an issue in this repo
+- read [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- review [docs/SETUP.md](docs/SETUP.md) and [docs/ONBOARDING.md](docs/ONBOARDING.md)

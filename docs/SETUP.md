@@ -12,8 +12,8 @@ Mehak's Job Search Model is optimized for business-role job seekers first:
 ## Basic setup
 
 ```bash
-git clone <your-template-repo>
-cd <your-template-repo>
+git clone https://github.com/mehakfromdelhi/jobsearchmodel.git
+cd jobsearchmodel
 npm install
 npx playwright install chromium
 ```
@@ -45,7 +45,7 @@ node cv-sync-check.mjs
 
 Open Claude Code in this folder and:
 
-- run `/career-ops scan`
+- run a job scan
 - publish results to a dashboard if you want one
 - review the roles that surfaced
 - ask for a tailored resume or cover letter for the best-fit role
@@ -63,10 +63,8 @@ Use the model in this order:
 
 Example:
 
-```bash
-/career-ops scan
-node sync-dashboard.mjs --target=sheets
-```
+- Ask Claude Code to run a job scan
+- Run `node sync-dashboard.mjs --target=sheets`
 
 ## Optional dashboard sync
 

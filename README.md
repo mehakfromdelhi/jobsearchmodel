@@ -28,10 +28,8 @@ The intended workflow is:
 
 In practice, that usually looks like:
 
-```bash
-/career-ops scan
-node sync-dashboard.mjs --target=sheets
-```
+- Ask Claude Code to run a job scan
+- Run `node sync-dashboard.mjs --target=sheets`
 
 Then use Claude to:
 - review the jobs in your dashboard
@@ -52,7 +50,7 @@ node cv-sync-check.mjs
 ```
 
 Then open Claude Code in this folder and:
-- run `/career-ops scan`
+- run your first job scan
 - publish results to your dashboard if you want one
 - review the best-fit roles
 - ask for a tailored resume or cover letter
@@ -85,9 +83,10 @@ Everything else is engine logic.
 ```bash
 npm run onboard
 npm run refresh-search
-/career-ops scan
 node sync-dashboard.mjs --target=sheets
 ```
+
+Then ask Claude Code to run a job scan.
 
 Then:
 - review the dashboard

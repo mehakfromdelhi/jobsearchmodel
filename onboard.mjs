@@ -116,7 +116,7 @@ console.log("- data/applications.md");
 console.log("\nNext steps:");
 console.log("1. Run `npm run refresh-search`");
 console.log("2. Run `node cv-sync-check.mjs`");
-console.log("3. Open Claude Code here and paste a job URL or run /career-ops scan");
+console.log("3. Open Claude Code here, paste a job URL, or ask it to run a job scan");
 
 function ensureDir(dirPath) {
   fs.mkdirSync(dirPath, { recursive: true });

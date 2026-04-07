@@ -1,5 +1,5 @@
 name: Bug Report
-description: Report a bug in career-ops
+description: Report a bug in Mehak's Job Search Model
 labels: ["bug"]
 body:
   - type: textarea
@@ -30,4 +30,4 @@ body:
     attributes:
       value: |
         ---
-        Built by [santifer](https://santifer.io) — need direct help? [Open a discussion](https://github.com/santifer/career-ops/discussions) or reach out at [santifer.io](https://santifer.io).
+        Thanks for helping improve Mehak's Job Search Model. Please include enough detail for a fresh-clone reproduction when possible.

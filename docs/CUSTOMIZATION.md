@@ -1,76 +1,74 @@
 # Customization Guide
 
-## Profile (config/profile.yml)
+This template is intentionally opinionated for business roles first. The easiest things to customize are:
 
-This is the single source of truth for your identity. All modes read from here.
+- your profile
+- your resumes
+- your ATS matching preferences
 
-Key sections:
-- **candidate**: Name, email, phone, location, LinkedIn, portfolio
-- **target_roles**: Your North Star roles and archetypes
-- **narrative**: Your headline, exit story, superpowers, proof points
-- **compensation**: Target range, minimum, currency
-- **location**: Country, timezone, visa status, on-site availability
+## Profile
 
-## Target Roles (modes/_shared.md)
+Edit:
 
-The archetype table in `_shared.md` determines how offers are scored and CVs are framed. Edit the table to match YOUR career targets:
+- `config/profile.yml`
 
-```markdown
-| Archetype | Thematic axes | What they buy |
-|-----------|---------------|---------------|
-| **Your Role 1** | key skills | what they need |
-| **Your Role 2** | key skills | what they need |
+This is the source of truth for:
+- name and contact info
+- target roles
+- narrative
+- compensation preferences
+- location preferences
+
+## ATS matching preferences
+
+Edit:
+
+- `config/matching-preferences.json`
+
+This is where you customize:
+- target functions
+- preferred locations
+- industries of interest
+- companies to seed into the watchlist
+- positive keywords
+- negative keywords
+- concept matches
+
+Then regenerate your scanner config:
+
+```bash
+npm run refresh-search
 ```
 
-Also update the "Adaptive Framing" table to map YOUR specific projects to each archetype.
+## Resume variants
 
-## Portals (portals.yml)
+Keep your active resume in:
 
-Copy from `templates/portals.example.yml` and customize:
+- `cv.md`
 
-1. **title_filter.positive**: Keywords matching your target roles
-2. **title_filter.negative**: Tech stacks or domains to exclude
-3. **search_queries**: WebSearch queries for job boards (Ashby, Greenhouse, Lever)
-4. **tracked_companies**: Companies to check directly
+Store reusable variants in:
 
-## CV Template (templates/cv-template.html)
+- `resumes/`
 
-The HTML template uses these design tokens:
-- **Fonts**: Space Grotesk (headings) + DM Sans (body) -- self-hosted in `fonts/`
-- **Colors**: Cyan primary (`hsl(187,74%,32%)`) + Purple accent (`hsl(270,70%,45%)`)
-- **Layout**: Single-column, ATS-optimized
+Common business-role variants:
+- `strategy-ops.md`
+- `gtm-ops.md`
+- `program-management.md`
+- `strategic-finance.md`
 
-To customize fonts/colors, edit the CSS in the template. Update font files in `fonts/` if switching fonts.
+Switch variants with:
 
-## Negotiation Scripts (modes/_shared.md)
-
-The negotiation section provides frameworks for salary discussions. Replace the example scripts with your own:
-- Target ranges
-- Geographic arbitrage strategy
-- Pushback responses
-
-## Hooks (Optional)
-
-Career-ops can integrate with external systems via Claude Code hooks. Example hooks:
-
-```json
-{
-  "hooks": {
-    "SessionStart": [{
-      "hooks": [{
-        "type": "command",
-        "command": "echo 'Career-ops session started'"
-      }]
-    }]
-  }
-}
+```bash
+npm run resume -- strategy-ops
 ```
 
-Save hooks in `.claude/settings.json`.
+## Dashboard setup
 
-## States (templates/states.yml)
+Dashboards are optional. If you want one:
 
-The canonical states rarely need changing. If you add new states, update:
-1. `templates/states.yml`
-2. `normalize-statuses.mjs` (alias mappings)
-3. `modes/_shared.md` (any references)
+- Google Sheets is the easiest default
+- Notion is optional second
+
+See:
+
+- `docs/DASHBOARD_SYNC.md`

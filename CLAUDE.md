@@ -15,58 +15,66 @@ The easiest user-editable surfaces are:
 |------|----------|
 | `data/applications.md` | Application tracker |
 | `data/pipeline.md` | Live inbox for fresh jobs |
-| `data/review-queue.md` | Relevant jobs with unknown/unverified posting dates |
+| `data/review-queue.md` | Relevant jobs with unknown or unverified posting dates |
 | `data/scan-history.tsv` | Scanner dedup history |
 | `portals.yml` | Live scanner policy, discovery config, and promoted companies |
 | `.env` / `.env.example` | Optional Google Sheets and Notion dashboard sync config |
 | `sync-dashboard.mjs` | One-way publisher for Live Pipeline, Review Queue, and Applications / Archive |
 | `templates/cv-template.html` | HTML template for CVs |
-| `generate-pdf.mjs` | Puppeteer: HTML to PDF |
-| `article-digest.md` | Compact proof points from portfolio (optional) |
-| `interview-prep/story-bank.md` | Accumulated STAR+R stories across evaluations |
+| `generate-pdf.mjs` | Puppeteer HTML-to-PDF utility |
+| `article-digest.md` | Compact proof points from portfolio or projects (optional) |
+| `interview-prep/story-bank.md` | Accumulated STAR stories across evaluations |
 | `reports/` | Evaluation reports (format: `{###}-{company-slug}-{YYYY-MM-DD}.md`) |
 
-### First Run — Onboarding (IMPORTANT)
+### First Run - Onboarding
 
-**Before doing ANYTHING else, check if the system is set up.** Run these checks silently every time a session starts:
+Before doing anything else, check whether the system is set up. Run these checks silently every session:
 
 1. Does `cv.md` exist?
-2. Does `config/profile.yml` exist (not just profile.example.yml)?
-3. Does `portals.yml` exist (not just templates/portals.example.yml)?
+2. Does `config/profile.yml` exist?
+3. Does `portals.yml` exist?
 
-**If ANY of these is missing, enter onboarding mode.** Do NOT proceed with evaluations, scans, or any other mode until the basics are in place. Guide the user step by step:
+If any of these is missing, enter onboarding mode. Do not proceed with scans or evaluations until the basics are in place.
 
-#### Step 1: CV (required)
+#### Step 1: CV
+
 If `cv.md` is missing, ask:
-> "I don't have your CV yet. You can either:
-> 1. Paste your CV here and I'll convert it to markdown
-> 2. Paste your LinkedIn URL and I'll extract the key info
-> 3. Tell me about your experience and I'll draft a CV for you
+
+> "I do not have your resume yet. You can either:
+> 1. Paste your resume here and I will convert it to markdown
+> 2. Paste your LinkedIn URL and I will extract the key information
+> 3. Tell me about your experience and I will draft a resume for you
 >
 > Which do you prefer?"
 
-Create `cv.md` from whatever they provide. Make it clean markdown with standard sections (Summary, Experience, Projects, Education, Skills).
+Create `cv.md` from what the user provides. Keep it clean markdown with standard sections such as Summary, Experience, Projects, Education, and Skills.
 
-#### Step 2: Profile (required)
-If `config/profile.yml` is missing, copy from `config/profile.example.yml` and then ask:
+#### Step 2: Profile
+
+If `config/profile.yml` is missing, copy from `config/profile.example.yml` and ask:
+
 > "I need a few details to personalize the system:
 > - Your full name and email
 > - Your location and timezone
-> - What roles are you targeting? (e.g., 'Senior Backend Engineer', 'AI Product Manager')
+> - What business roles are you targeting?
 > - Your salary target range
 >
-> I'll set everything up for you."
+> I will set everything up for you."
 
-Fill in `config/profile.yml` with their answers. For archetypes, map their target roles to the closest matches and update `modes/_shared.md` if needed.
+Fill in `config/profile.yml` with their answers. Map target roles to the closest business-role archetypes and update `modes/_shared.md` when needed.
 
-#### Step 3: Portals (recommended)
-If `portals.yml` is missing:
-> "I'll set up the live scanner so it can discover relevant jobs broadly across ATS platforms and promote good companies into a watch list. I'll also customize the relevance keywords for your target roles."
+#### Step 3: Search Config
 
-Copy `templates/portals.example.yml` → `portals.yml`. If they gave target roles in Step 2, customize the live scan policy, relevance keywords, freshness rules, and ATS search queries.
+If `portals.yml` is missing, say:
+
+> "I will set up the live scanner so it can discover relevant business roles across ATS platforms, prioritize fresh jobs, and customize the keyword matching for your target roles."
+
+Copy `templates/portals.example.yml` to `portals.yml`. If the user already provided target roles, customize the scan policy, relevance keywords, freshness rules, and ATS search queries.
 
 #### Step 4: Tracker
-If `data/applications.md` doesn't exist, create it:
+
+If `data/applications.md` does not exist, create it:
+
 ```markdown
 # Applications Tracker
 
@@ -74,134 +82,133 @@ If `data/applications.md` doesn't exist, create it:
 |---|------|---------|------|-------|--------|-----|--------|-------|
 ```
 
-#### Step 4b: Dashboard sync (optional)
-If the user wants Google Sheets or Notion dashboards:
+#### Step 4b: Dashboard Sync
+
+If the user wants Google Sheets or Notion dashboards, say:
+
 > "I can keep the local files as the source of truth and publish three clean dashboard views: Live Pipeline, Review Queue, and Applications / Archive."
 
-Use `.env.example` as the template, then configure `sync-dashboard.mjs`.
+Use `.env.example` as the template and then configure `sync-dashboard.mjs`.
 
 #### Step 5: Ready
+
 Once all files exist, confirm:
-> "You're all set! You can now:
+
+> "You are all set. You can now:
 > - Paste a job URL to evaluate it
-> - Run `/career-ops scan` to search portals
-> - Run `/career-ops` to see all commands
+> - Ask me to run a job scan across live ATS sources
+> - Ask me to publish the latest results to your dashboard
 >
-> Everything is customizable — just ask me to change anything.
+> Everything is customizable, so ask me to change anything you want.
 >
-> Tip: Having a personal portfolio dramatically improves your job search. If you don't have one yet, the author's portfolio is also open source: github.com/santifer/cv-santiago — feel free to fork it and make it yours."
+> Tip: A simple personal portfolio, deal sheet, or project page can strengthen business-role applications, especially for strategy, operations, GTM, and program management roles."
 
 Then suggest automation:
-> "Want me to scan for new offers automatically? I can set up a recurring scan every few days so you don't miss anything. Just say 'scan every 3 days' and I'll configure it."
 
-If the user accepts, use the `/loop` or `/schedule` skill (if available) to set up a recurring `/career-ops scan`. If those aren't available, suggest adding a cron job or remind them to run `/career-ops scan` periodically.
+> "Want me to scan for new roles automatically? I can set up a recurring scan every few days so you do not miss anything. Just say 'scan every 3 days' and I will configure it."
+
+If the user accepts, use the `/loop` or `/schedule` skill when available to set up a recurring job scan. Otherwise, suggest adding a scheduled reminder or recurring task.
 
 ### Personalization
 
-This system is designed to be customized by YOU (Claude). When the user asks you to change archetypes, translate modes, adjust scoring, add companies, or modify negotiation scripts -- do it directly. You read the same files you use, so you know exactly what to edit.
+This system is designed to be customized directly. When the user asks to change role families, scoring logic, companies, keywords, or document templates, edit the files directly.
 
-**Common customization requests:**
-- "Change the archetypes to [backend/frontend/data/devops] roles" → edit `modes/_shared.md`
-- "Translate the modes to English" → edit all files in `modes/`
-- "Add these companies to my portals" → edit `portals.yml`
-- "Update my profile" → edit `config/profile.yml`
-- "Change the CV template design" → edit `templates/cv-template.html`
-- "Adjust the scoring weights" → edit `modes/_shared.md` and `batch/batch-prompt.md`
+Common customization requests:
+- "Change the target functions to strategy ops, GTM, program management, or strategic finance" -> edit `modes/_shared.md`
+- "Translate the modes to English" -> edit files in `modes/`
+- "Add these companies to my watchlist" -> edit `portals.yml`
+- "Update my profile" -> edit `config/profile.yml`
+- "Change the CV template design" -> edit `templates/cv-template.html`
+- "Adjust the scoring weights" -> edit `modes/_shared.md` and `batch/batch-prompt.md`
 
 ### Skill Modes
 
 | If the user... | Mode |
 |----------------|------|
-| Pastes JD or URL | auto-pipeline (evaluate + report + PDF + tracker) |
-| Asks to evaluate offer | `oferta` |
+| Pastes a JD or URL | auto-pipeline |
+| Asks to evaluate an offer | `oferta` |
 | Asks to compare offers | `ofertas` |
 | Wants LinkedIn outreach | `contacto` |
 | Asks for company research | `deep` |
-| Wants to generate CV/PDF | `pdf` |
-| Evaluates a course/cert | `training` |
-| Evaluates portfolio project | `project` |
+| Wants to generate CV or PDF | `pdf` |
+| Evaluates a course or cert | `training` |
+| Evaluates a portfolio project | `project` |
 | Asks about application status | `tracker` |
-| Fills out application form | `apply` |
+| Fills out an application form | `apply` |
 | Searches for new offers | `scan` |
 | Processes pending URLs | `pipeline` |
 | Batch processes offers | `batch` |
 
 ### CV Source of Truth
 
-- `cv.md` in project root is the canonical CV
-- `article-digest.md` has detailed proof points (optional)
-- **NEVER hardcode metrics** -- read them from these files at evaluation time
+- `cv.md` in the project root is the canonical CV
+- `article-digest.md` can hold detailed proof points
+- Never hardcode metrics; read them from the user files at evaluation time
 
 ---
 
-## Ethical Use -- CRITICAL
+## Ethical Use
 
-**This system is designed for quality, not quantity.** The goal is to help the user find and apply to roles where there is a genuine match -- not to spam companies with mass applications.
+This system is designed for quality, not quantity. The goal is to help the user find and apply to roles where there is a genuine match.
 
-- **NEVER submit an application without the user reviewing it first.** Fill forms, draft answers, generate PDFs -- but always STOP before clicking Submit/Send/Apply. The user makes the final call.
-- **Discourage low-fit applications.** If a score is below 3.0/5, explicitly tell the user this is a weak match and recommend skipping unless they have a specific reason.
-- **Quality over speed.** A well-targeted application to 5 companies beats a generic blast to 50. Guide the user toward fewer, better applications.
-- **Respect recruiters' time.** Every application a human reads costs someone's attention. Only send what's worth reading.
+- Never submit an application without the user reviewing it first
+- Discourage low-fit applications when the score is weak
+- Favor fewer, stronger applications over broad volume
+- Respect recruiters' time by keeping applications thoughtful and relevant
 
 ---
 
-## Offer Verification -- MANDATORY
+## Offer Verification
 
-**NEVER trust WebSearch/WebFetch to verify if an offer is still active.** ALWAYS use Playwright:
-1. `browser_navigate` to the URL
-2. `browser_snapshot` to read content
-3. Only footer/navbar without JD = closed. Title + description + Apply = active.
-
-**Exception for batch workers (`claude -p`):** Playwright is not available in headless pipe mode. Use WebFetch as fallback and mark the report header with `**Verification:** unconfirmed (batch mode)`. The user can verify manually later.
+Do not rely on generic search results alone to verify whether a role is still active. Prefer the direct ATS or company careers page, and use LinkedIn only as a secondary freshness signal when appropriate.
 
 ---
 
 ## Stack and Conventions
 
-- Node.js (mjs modules), Playwright (PDF + scraping), YAML (config), HTML/CSS (template), Markdown (data)
-- Scripts in `.mjs`, configuration in YAML
-- Output in `output/` (gitignored), Reports in `reports/`
-- JDs in `jds/` (referenced as `local:jds/{file}` in pipeline.md)
-- Batch in `batch/` (gitignored except scripts and prompt)
-- Report numbering: sequential 3-digit zero-padded, max existing + 1
-- **RULE: After each batch of evaluations, run `node merge-tracker.mjs`** to merge tracker additions and avoid duplications.
-- **RULE: NEVER create new entries in applications.md if company+role already exists.** Update the existing entry.
+- Node.js (`.mjs` modules), Playwright, YAML, HTML/CSS, Markdown
+- Scripts live in `.mjs` files
+- Output goes in `output/` (gitignored), reports in `reports/`
+- Job descriptions can be stored in `jds/`
+- Batch tooling lives in `batch/`
+- Report numbering is sequential and zero-padded
+- After a batch of evaluations, run `node merge-tracker.mjs`
+- Do not create duplicate entries in `applications.md` for the same company and role
 
 ### TSV Format for Tracker Additions
 
-Write one TSV file per evaluation to `batch/tracker-additions/{num}-{company-slug}.tsv`. Single line, 9 tab-separated columns:
+Write one TSV file per evaluation to `batch/tracker-additions/{num}-{company-slug}.tsv`. Use a single line with nine tab-separated columns:
 
 ```
 {num}\t{date}\t{company}\t{role}\t{status}\t{score}/5\t{pdf_emoji}\t[{num}](reports/{num}-{slug}-{date}.md)\t{note}
 ```
 
-**Column order (IMPORTANT -- status BEFORE score):**
-1. `num` -- sequential number (integer)
-2. `date` -- YYYY-MM-DD
-3. `company` -- short company name
-4. `role` -- job title
-5. `status` -- canonical status (e.g., `Evaluated`)
-6. `score` -- format `X.X/5` (e.g., `4.2/5`)
-7. `pdf` -- `✅` or `❌`
-8. `report` -- markdown link `[num](reports/...)`
-9. `notes` -- one-line summary
-
-**Note:** In applications.md, score comes BEFORE status. The merge script handles this column swap automatically.
+Column order:
+1. `num`
+2. `date`
+3. `company`
+4. `role`
+5. `status`
+6. `score`
+7. `pdf`
+8. `report`
+9. `notes`
 
 ### Pipeline Integrity
 
-1. **NEVER edit applications.md to ADD new entries** -- Write TSV in `batch/tracker-additions/` and `merge-tracker.mjs` handles the merge.
-2. **YES you can edit applications.md to UPDATE status/notes of existing entries.**
-3. All reports MUST include `**URL:**` in the header (between Score and PDF).
-4. All statuses MUST be canonical (see `templates/states.yml`).
-5. Health check: `node verify-pipeline.mjs`
-6. Normalize statuses: `node normalize-statuses.mjs`
-7. Dedup: `node dedup-tracker.mjs`
-8. External dashboards: `node sync-dashboard.mjs --dry-run` before publishing to Sheets or Notion
+1. Do not add new tracker entries directly to `applications.md`; write TSV rows and merge them
+2. You may update status or notes for existing entries
+3. Reports should include `URL` in the header
+4. Status values should stay canonical
+5. Useful maintenance commands:
+   - `node verify-pipeline.mjs`
+   - `node normalize-statuses.mjs`
+   - `node dedup-tracker.mjs`
+   - `node sync-dashboard.mjs --dry-run`
 
-### Canonical States (applications.md)
+### Canonical States
 
-**Source of truth:** `templates/states.yml`
+Source of truth: `templates/states.yml`
 
 | State | When to use |
 |-------|-------------|
@@ -211,10 +218,10 @@ Write one TSV file per evaluation to `batch/tracker-additions/{num}-{company-slu
 | `Interview` | In interview process |
 | `Offer` | Offer received |
 | `Rejected` | Rejected by company |
-| `Discarded` | Discarded by candidate or offer closed |
-| `SKIP` | Doesn't fit, don't apply |
+| `Discarded` | Discarded by candidate or role closed |
+| `SKIP` | Not a fit |
 
-**RULES:**
-- No markdown bold (`**`) in status field
-- No dates in status field (use the date column)
-- No extra text (use the notes column)
+Rules:
+- No markdown bold in status values
+- No dates in the status field
+- Put extra detail in notes, not status
