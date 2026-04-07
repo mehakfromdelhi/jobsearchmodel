@@ -238,6 +238,24 @@ If someone else wants to use this repo, their path should be:
 
 They should not need to manually edit deep engine files to get started.
 
+## Common Mistakes
+
+These are the most common ways new users get stuck:
+
+- forgetting to run `npm run onboard`
+- forgetting to run `npm run refresh-search` after onboarding
+- expecting dashboard sync to work before creating `.env`
+- never updating the default ATS keywords to match their own search
+- trying to tailor resumes before they have picked a real target role
+
+The fastest path is:
+
+1. onboard
+2. refresh search
+3. run a scan
+4. review the pipeline
+5. tailor for one real role
+
 ## Docs
 
 - [Setup](docs/SETUP.md)
