@@ -20,6 +20,20 @@ Instead of manually juggling resumes, job links, dashboards, and notes, this mod
 6. Tailor your resume
 7. Generate application materials
 
+## Workflow Diagram
+
+```mermaid
+flowchart LR
+    A["Clone Repo"] --> B["Run Onboarding"]
+    B --> C["Generate Search Config"]
+    C --> D["Run Job Scan in Claude Code"]
+    D --> E["Publish to Dashboard"]
+    E --> F["Review and Rank Roles"]
+    F --> G["Choose One Target Role"]
+    G --> H["Tailor Resume"]
+    H --> I["Generate Cover Letter or Application Materials"]
+```
+
 ## What This Repo Does
 
 This repo helps you:
@@ -59,6 +73,30 @@ In practice, that usually looks like:
 - run `node sync-dashboard.mjs --target=sheets`
 - ask Claude to rank roles
 - ask Claude to tailor `cv.md` for the job you pick
+
+## What The Output Looks Like
+
+Here is the kind of workflow this repo is built around:
+
+### Live Pipeline
+
+| Company | Role | Freshness | Location | Priority |
+|---------|------|-----------|----------|----------|
+| Together AI | Senior Program Manager, Infrastructure Strategy and Business Operations | 3 days | San Francisco | High |
+| SmithRx | Senior Strategic Finance Manager | 2 days | Remote / Bay Area | High |
+| Lucid | Strategy & Business Operations Manager | 4 days | Bay Area | Medium |
+
+### Review Queue
+
+| Company | Role | Why it needs review |
+|---------|------|---------------------|
+| Canva | Program Manager, Strategy and Enablement | date unclear on source page |
+| Mixpanel | Revenue Strategy & Operations Manager | freshness needs secondary verification |
+
+The exact jobs will be different for each user, but the structure is the same:
+- fresh verified jobs go to the live pipeline
+- uncertain jobs go to the review queue
+- applied or stale jobs go to the archive view
 
 ## Quick Start
 
@@ -110,6 +148,27 @@ If you are new, do this in order:
 5. `node cv-sync-check.mjs`
 6. Open Claude Code in this repo
 7. Ask Claude to run your first job scan
+
+## Before and After Onboarding
+
+Before onboarding, the repo is just a template.
+
+You will mainly see:
+- example config files
+- docs
+- scripts
+- empty or starter folders
+
+After onboarding, the repo becomes your personal workspace.
+
+You will have:
+- your own `config/profile.yml`
+- your own `config/matching-preferences.json`
+- your own `cv.md`
+- your own resume variants in `resumes/`
+- your own generated `portals.yml`
+
+That is the moment when the model starts feeling personal instead of generic.
 
 ## What You Need To Edit
 
@@ -237,6 +296,24 @@ If someone else wants to use this repo, their path should be:
 8. Optionally connect Google Sheets or Notion
 
 They should not need to manually edit deep engine files to get started.
+
+## Example Walkthrough
+
+Here is a simple example of how another person might use the repo:
+
+1. Clone the repo
+2. Run `npm install`
+3. Run `npm run onboard`
+4. Paste a resume targeted to strategy and operations
+5. Add keywords like `business operations`, `strategic planning`, `program management`, and `financial modeling`
+6. Add preferred locations like `San Francisco` and `New York`
+7. Run `npm run refresh-search`
+8. Open Claude Code and say `Run a fresh job scan for me`
+9. Publish the results to Google Sheets
+10. Ask Claude to rank the top three jobs
+11. Pick one role and say `Tailor my resume for this job URL`
+
+That full path is the main user experience this repo is built for.
 
 ## Common Mistakes
 
