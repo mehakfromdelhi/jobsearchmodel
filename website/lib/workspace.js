@@ -74,6 +74,24 @@ export async function getWorkspaceData(user, demoMode = false) {
     };
   }
 
+  if (!user) {
+    return {
+      user: null,
+      dashboardStats: [
+        { label: "Fresh roles", value: "0", detail: "Verified within last 5 days" },
+        { label: "Need review", value: "0", detail: "Relevant but lower confidence" },
+        { label: "Recent scans", value: "0", detail: "Manual scans this week" },
+        { label: "Tailored resumes", value: "0", detail: "Saved to this workspace" }
+      ],
+      jobs: [],
+      applications: [],
+      generatedMaterials: [],
+      resumeVariants: [],
+      profileComplete: false,
+      betaMode: false
+    };
+  }
+
   const prisma = await getPrisma();
 
   const [profile, preferences, jobs, applications, resumeVariants, scanRuns, generatedMaterials] = await Promise.all([

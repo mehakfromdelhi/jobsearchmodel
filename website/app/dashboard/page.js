@@ -9,6 +9,9 @@ import { getWorkspaceData } from "@/lib/workspace";
 export default async function DashboardPage() {
   const { user, demoMode } = await getViewer({ requireAuth: false });
   const workspace = await getWorkspaceData(user, demoMode);
+  if (!demoMode && !user) {
+    redirect("/sign-in");
+  }
   if (!demoMode && user && !workspace.profileComplete) {
     redirect("/onboarding");
   }
