@@ -1,7 +1,12 @@
 import { AppShell } from "@/components/app-shell";
-import { resumeVariants } from "@/lib/mock-data";
+import { ResumeActivateButton } from "@/components/resume-actions";
+import { getViewer } from "@/lib/auth";
+import { getWorkspaceData } from "@/lib/workspace";
 
-export default function ResumesPage() {
+export default async function ResumesPage() {
+  const { user, demoMode } = await getViewer({ requireAuth: false });
+  const workspace = await getWorkspaceData(user, demoMode);
+
   return (
     <AppShell
       title="Resume Manager"
@@ -34,7 +39,7 @@ export default function ResumesPage() {
               </tr>
             </thead>
             <tbody>
-              {resumeVariants.map((variant) => (
+              {workspace.resumeVariants.map((variant) => (
                 <tr key={variant.id}>
                   <td>{variant.name}</td>
                   <td>{variant.roleFamily}</td>
@@ -43,7 +48,7 @@ export default function ResumesPage() {
                   <td>{variant.summary}</td>
                   <td>
                     <div className="inline-actions">
-                      <button className="link-button">Set Active</button>
+                      <ResumeActivateButton resumeId={variant.id} active={variant.active} />
                       <button className="link-button">Edit</button>
                       <button className="link-button">Duplicate</button>
                     </div>

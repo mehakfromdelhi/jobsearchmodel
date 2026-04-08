@@ -1,28 +1,42 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
+import { DashboardActions } from "@/components/dashboard-actions";
 import { JobTable } from "@/components/job-table";
-import { applications, dashboardStats, generatedMaterials, jobs } from "@/lib/mock-data";
+import { getViewer } from "@/lib/auth";
+import { getWorkspaceData } from "@/lib/workspace";
 
-const livePipeline = jobs.filter((job) => job.workflowState === "live_pipeline");
-const reviewQueue = jobs.filter((job) => job.workflowState === "review_queue");
+export default async function DashboardPage() {
+  const { user, demoMode } = await getViewer({ requireAuth: false });
+  const workspace = await getWorkspaceData(user, demoMode);
+  if (!demoMode && user && !workspace.profileComplete) {
+    redirect("/onboarding");
+  }
+  const livePipeline = workspace.jobs.filter((job) => job.workflowState === "live_pipeline");
+  const reviewQueue = workspace.jobs.filter((job) => job.workflowState === "review_queue");
 
-export default function DashboardPage() {
   return (
     <AppShell
       title="Dashboard"
       subtitle="The primary workspace: live pipeline, review queue, applications, and resume/material generation in one place."
       actions={
         <>
-          <button className="button">Run Scan</button>
           <Link href="/resumes" className="button-secondary">
             Upload Resume
           </Link>
-          <button className="button-ghost">Sync Dashboard</button>
+          <DashboardActions />
         </>
       }
     >
+      {workspace.betaMode ? (
+        <div className="card tinted-card">
+          <p className="eyebrow">Demo mode</p>
+          <h3>Auth and database are not configured yet</h3>
+          <p>The beta app falls back to demo data locally until Supabase and Postgres env vars are set.</p>
+        </div>
+      ) : null}
       <section className="card-grid">
-        {dashboardStats.map((stat) => (
+        {workspace.dashboardStats.map((stat) => (
           <div key={stat.label} className="card stat-card">
             <p className="eyebrow">{stat.label}</p>
             <strong>{stat.value}</strong>
@@ -64,7 +78,7 @@ export default function DashboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {applications.map((application) => (
+                  {workspace.applications.map((application) => (
                     <tr key={application.id}>
                       <td>{application.company}</td>
                       <td>{application.role}</td>
@@ -90,7 +104,7 @@ export default function DashboardPage() {
               <p className="eyebrow">Generated materials</p>
               <h3>Recent AI outputs</h3>
               <ul className="clean-list">
-                {generatedMaterials.map((item) => (
+                {workspace.generatedMaterials.map((item) => (
                   <li key={item.id}>
                     <strong>{item.kind}:</strong> {item.title} <span className="muted-text">({item.status})</span>
                   </li>

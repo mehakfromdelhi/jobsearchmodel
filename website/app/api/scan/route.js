@@ -1,13 +1,16 @@
-import { jobs } from "@/lib/mock-data";
+import { getViewer } from "@/lib/auth";
+import { runManualScan } from "@/lib/workspace";
 
 export async function POST() {
-  return Response.json({
-    ok: true,
-    summary: {
-      livePipeline: jobs.filter((job) => job.workflowState === "live_pipeline").length,
-      reviewQueue: jobs.filter((job) => job.workflowState === "review_queue").length
-    },
-    jobs,
-    message: "Prototype scan response. Replace with server-side ATS discovery, ranking, and freshness verification."
-  });
+  const { user } = await getViewer();
+  if (!user) {
+    return Response.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
+  const result = await runManualScan(user);
+  if (!result.ok) {
+    return Response.json(result, { status: 429 });
+  }
+
+  return Response.json(result);
 }

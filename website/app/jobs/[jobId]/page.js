@@ -1,11 +1,15 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
-import { getJob } from "@/lib/mock-data";
+import { JobActions } from "@/components/job-actions";
+import { getViewer } from "@/lib/auth";
+import { getWorkspaceData } from "@/lib/workspace";
 
 export default async function JobDetailPage({ params }) {
   const { jobId } = await params;
-  const job = getJob(jobId);
+  const { user, demoMode } = await getViewer({ requireAuth: false });
+  const workspace = await getWorkspaceData(user, demoMode);
+  const job = workspace.jobs.find((item) => item.id === jobId);
 
   if (!job) {
     notFound();
@@ -15,13 +19,7 @@ export default async function JobDetailPage({ params }) {
     <AppShell
       title={job.role}
       subtitle={`${job.company} • ${job.location} • ${job.sourcePlatform}`}
-      actions={
-        <>
-          <button className="button">Tailor Resume</button>
-          <button className="button-secondary">Generate Cover Letter</button>
-          <button className="button-ghost">Mark Applied</button>
-        </>
-      }
+      actions={<JobActions jobId={job.id} allowPromote={job.workflowState === "review_queue"} />}
     >
       <div className="job-detail-grid">
         <div className="stack">
@@ -67,11 +65,7 @@ export default async function JobDetailPage({ params }) {
           <section className="card">
             <p className="eyebrow">Workflow</p>
             <h3>Next decisions</h3>
-            <div className="stack">
-              <button className="button">Tailor Resume</button>
-              <button className="button-secondary">Compare to Another Role</button>
-              <button className="button-ghost">Archive</button>
-            </div>
+            <JobActions jobId={job.id} allowPromote={job.workflowState === "review_queue"} />
           </section>
         </div>
       </div>

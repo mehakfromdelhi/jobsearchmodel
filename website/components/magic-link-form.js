@@ -5,6 +5,7 @@ import { useState } from "react";
 export function MagicLinkForm() {
   const [email, setEmail] = useState("");
   const [state, setState] = useState("idle");
+  const [message, setMessage] = useState("");
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -17,9 +18,13 @@ export function MagicLinkForm() {
       body: JSON.stringify({ email })
     });
     if (response.ok) {
+      const json = await response.json();
       setState("sent");
+      setMessage(json.message || "Magic link requested.");
       return;
     }
+    const json = await response.json();
+    setMessage(json.error || "Could not request a magic link.");
     setState("error");
   }
 
@@ -41,10 +46,8 @@ export function MagicLinkForm() {
       <button type="submit" className="button" disabled={state === "loading"}>
         {state === "loading" ? "Sending..." : "Send magic link"}
       </button>
-      {state === "sent" ? (
-        <p className="success-text">Magic link requested. In production, the backend will email a unique temporary sign-in link to this address.</p>
-      ) : null}
-      {state === "error" ? <p className="error-text">Could not request a magic link. Check the auth backend wiring.</p> : null}
+      {state === "sent" ? <p className="success-text">{message}</p> : null}
+      {state === "error" ? <p className="error-text">{message}</p> : null}
     </form>
   );
 }

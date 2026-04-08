@@ -73,6 +73,15 @@ p, li { color: var(--muted); line-height: 1.65; }
   flex-wrap: wrap;
 }
 
+.action-stack {
+  display: grid;
+  gap: 10px;
+}
+
+.action-message {
+  margin: 0;
+}
+
 .button, .button-secondary, .button-ghost {
   display: inline-flex;
   align-items: center;

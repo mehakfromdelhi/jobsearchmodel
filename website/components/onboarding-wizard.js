@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
 const stepDefinitions = [
   { key: "profile", title: "Basic info" },
@@ -12,9 +13,11 @@ const stepDefinitions = [
 ];
 
 export function OnboardingWizard() {
+  const router = useRouter();
   const [stepIndex, setStepIndex] = useState(0);
   const [email, setEmail] = useState("mehak@example.com");
   const [submitted, setSubmitted] = useState(false);
+  const [submissionMessage, setSubmissionMessage] = useState("");
   const [form, setForm] = useState({
     name: "Mehak Bhatia",
     location: "San Francisco, CA",
@@ -49,9 +52,25 @@ export function OnboardingWizard() {
     setStepIndex((value) => Math.max(value - 1, 0));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
-    setSubmitted(true);
+    const response = await fetch("/api/onboarding", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...form,
+        email
+      })
+    });
+    const json = await response.json();
+    if (response.ok) {
+      setSubmitted(true);
+      setSubmissionMessage(json.demoMode ? "Demo workspace created." : "Workspace saved. Redirecting to dashboard...");
+      setTimeout(() => router.push("/dashboard"), 900);
+      return;
+    }
+    setSubmitted(false);
+    setSubmissionMessage(json.error || "Could not save onboarding.");
   }
 
   return (
@@ -193,9 +212,9 @@ export function OnboardingWizard() {
 
         {submitted ? (
           <div className="success-banner">
-            <strong>Workspace created.</strong> In the production build this would persist the profile, resume, and preferences, then route the user to the dashboard.
+            <strong>Workspace created.</strong> {submissionMessage}
           </div>
-        ) : null}
+        ) : submissionMessage ? <div className="error-text">{submissionMessage}</div> : null}
       </form>
     </div>
   );

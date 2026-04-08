@@ -362,6 +362,13 @@ npm install
 npm run dev
 ```
 
+For the zero-cost beta version:
+- use `Vercel Hobby`
+- use `Supabase Free`
+- keep scans manual only
+- keep the website as the personal dashboard
+- skip Google Sheets and Notion for now
+
 ## Security Notes
 
 - This repo ships with placeholders only in `.env.example`
