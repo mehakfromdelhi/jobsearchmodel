@@ -2,6 +2,20 @@
 
 A public, cloneable job-search system for business-role candidates using Claude Code.
 
+## Live Beta
+
+Live site:
+- [https://jobsearchmodel.vercel.app](https://jobsearchmodel.vercel.app)
+
+Current website status:
+- homepage is live on Vercel
+- Supabase is connected
+- database schema is deployed
+- invite-only beta auth is enabled
+- sign-in and magic-link delivery are still being actively debugged for beta testing
+
+If you are cloning this repo, treat the website as an active beta rather than a finished product.
+
 I built this for people targeting roles like:
 - Strategy & Operations
 - GTM / Revenue / Enablement-adjacent roles
@@ -73,6 +87,20 @@ In practice, that usually looks like:
 - run `node sync-dashboard.mjs --target=sheets`
 - ask Claude to rank roles
 - ask Claude to tailor `cv.md` for the job you pick
+
+## What We Are Building Right Now
+
+The product is moving from a repo-first workflow into a lightweight web app for a small invite-only beta.
+
+Right now, the active buildout looks like this:
+
+1. get users into a private workspace with magic-link sign-in
+2. onboard them with their resume, keywords, locations, and target roles
+3. let them run a manual scan
+4. review live pipeline and review queue inside the website
+5. tailor resumes and generate application materials from a selected role
+
+The website is intended to become the personal dashboard, while the repo remains the source design and backup operating system.
 
 ## What The Output Looks Like
 
@@ -368,6 +396,11 @@ For the zero-cost beta version:
 - keep scans manual only
 - keep the website as the personal dashboard
 - skip Google Sheets and Notion for now
+
+For the current live beta:
+- homepage is available at [https://jobsearchmodel.vercel.app](https://jobsearchmodel.vercel.app)
+- auth and invite flow are in active testing
+- see `website/README.md` and `website/DEPLOY_BETA.md` for the latest website-specific status
 
 ## Security Notes
 

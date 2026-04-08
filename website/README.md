@@ -2,6 +2,27 @@
 
 This folder contains the browser-native product scaffold for Mehak's Job Search Model.
 
+## Live Beta URL
+
+- [https://jobsearchmodel.vercel.app](https://jobsearchmodel.vercel.app)
+
+## Current Status
+
+This website is live, but still in active beta stabilization.
+
+Working now:
+- homepage deployment on Vercel
+- Supabase connection
+- Prisma database schema
+- invite-only beta gating
+
+Still being worked on:
+- production magic-link sign-in reliability
+- fallback auth flow for beta testers when email delivery is restricted
+- complete end-to-end onboarding verification in production
+
+For the most current website notes, see [BETA_STATUS.md](./BETA_STATUS.md).
+
 ## Zero-cost beta stack
 
 - `Vercel Hobby` for hosting
@@ -42,6 +63,7 @@ npm run dev
 1. Copy `.env.example` to `.env.local`
 2. Fill in:
    - `DATABASE_URL`
+   - `DIRECT_URL`
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - `SUPABASE_SERVICE_ROLE_KEY`

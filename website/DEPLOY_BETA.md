@@ -8,6 +8,20 @@ This app is now prepared for a free-tier beta with:
 - manual scans only
 - website-first dashboard
 
+## Live Beta URL
+
+- [https://jobsearchmodel.vercel.app](https://jobsearchmodel.vercel.app)
+
+## Current Deployment Reality
+
+The live site is deployed, but the beta is still being stabilized.
+
+As of now:
+- production homepage works
+- database connection is live
+- invite-only gating is live
+- auth delivery and beta magic-link behavior are still under active debugging
+
 ## What has already been done in code
 
 - invite-only magic-link request route
@@ -32,6 +46,7 @@ These steps cannot be completed from inside the repo because they require owners
 Create a new Supabase project and collect:
 
 - `DATABASE_URL`
+- `DIRECT_URL`
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
@@ -102,8 +117,20 @@ To stay within free-tier limits:
 - Vercel project created
 - Vercel env vars set
 - invite list populated
-- first test user receives login email
+- first tester can sign in successfully
+- first tester can finish onboarding
 - first scan works from dashboard
+
+## Current Priority
+
+The immediate goal is to make the live beta stable enough for invite-only testers.
+
+The priority order is:
+1. auth works reliably
+2. onboarding completes
+3. dashboard opens
+4. scan runs
+5. tailoring flow works
 
 ## If you want the absolute next step
 
