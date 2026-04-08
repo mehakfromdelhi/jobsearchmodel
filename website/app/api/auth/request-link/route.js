@@ -1,5 +1,6 @@
 import { appUrl, hasDatabase, hasSupabase, isInviteAllowed } from "@/lib/env";
 import { getPrisma } from "@/lib/prisma";
+import { createClient } from "@supabase/supabase-js";
 
 export async function POST(request) {
   const body = await request.json();
@@ -52,6 +53,45 @@ export async function POST(request) {
 
   if (!response.ok) {
     const errorText = await response.text();
+
+    if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      const adminClient = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY,
+        {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false
+          }
+        }
+      );
+
+      const { data, error } = await adminClient.auth.admin.generateLink({
+        type: "magiclink",
+        email,
+        options: {
+          redirectTo: `${appUrl()}/auth/callback`
+        }
+      });
+
+      const debugLink =
+        data?.properties?.action_link ||
+        data?.properties?.actionLink ||
+        data?.action_link ||
+        data?.actionLink;
+
+      if (!error && debugLink) {
+        return Response.json({
+          ok: true,
+          email,
+          betaFallback: true,
+          magicLink: debugLink,
+          message:
+            "Supabase email delivery is restricted right now, so this beta is showing a one-time sign-in link directly."
+        });
+      }
+    }
+
     return Response.json({ error: `Could not send magic link: ${errorText}` }, { status: 400 });
   }
 

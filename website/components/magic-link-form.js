@@ -6,10 +6,12 @@ export function MagicLinkForm() {
   const [email, setEmail] = useState("");
   const [state, setState] = useState("idle");
   const [message, setMessage] = useState("");
+  const [magicLink, setMagicLink] = useState("");
 
   async function handleSubmit(event) {
     event.preventDefault();
     setState("loading");
+    setMagicLink("");
     const response = await fetch("/api/auth/request-link", {
       method: "POST",
       headers: {
@@ -21,6 +23,7 @@ export function MagicLinkForm() {
       const json = await response.json();
       setState("sent");
       setMessage(json.message || "Magic link requested.");
+      setMagicLink(json.magicLink || "");
       return;
     }
     const json = await response.json();
@@ -47,6 +50,14 @@ export function MagicLinkForm() {
         {state === "loading" ? "Sending..." : "Send magic link"}
       </button>
       {state === "sent" ? <p className="success-text">{message}</p> : null}
+      {magicLink ? (
+        <p className="success-text">
+          Beta fallback link:{" "}
+          <a href={magicLink} target="_blank" rel="noreferrer">
+            Open magic link
+          </a>
+        </p>
+      ) : null}
       {state === "error" ? <p className="error-text">{message}</p> : null}
     </form>
   );
