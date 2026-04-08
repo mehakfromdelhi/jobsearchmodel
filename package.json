@@ -12,7 +12,9 @@
     "pdf": "node generate-pdf.mjs",
     "sync-check": "node cv-sync-check.mjs",
     "resume": "node select-resume.mjs",
-    "sync-dashboard": "node sync-dashboard.mjs"
+    "sync-dashboard": "node sync-dashboard.mjs",
+    "website:dev": "npm --prefix website run dev",
+    "website:build": "npm --prefix website run build"
   },
   "keywords": ["job-search", "claude-code", "business-roles", "resume", "ats", "career"],
   "author": "Mehak Bhatia",

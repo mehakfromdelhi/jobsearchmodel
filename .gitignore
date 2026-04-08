@@ -29,6 +29,7 @@ portals.yml
 # Generated
 .resolved-prompt-*
 node_modules/
+website/.next/
 .env
 careerops.env
 

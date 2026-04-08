@@ -342,6 +342,26 @@ The fastest path is:
 - [Example Personas](docs/PERSONAS.md)
 - [Customization Guide](docs/CUSTOMIZATION.md)
 
+## Website App
+
+A browser-native product scaffold now lives in `website/`.
+
+Use it if you want to evolve the repo into:
+- a landing page
+- magic-link sign-in
+- onboarding flow
+- dashboard and job detail pages
+- resume manager
+- settings and integrations
+
+To run it locally:
+
+```bash
+cd website
+npm install
+npm run dev
+```
+
 ## Security Notes
 
 - This repo ships with placeholders only in `.env.example`
