@@ -7,7 +7,7 @@ import { getWorkspaceData } from "@/lib/workspace";
 
 export default async function JobDetailPage({ params }) {
   const { jobId } = await params;
-  const { user, demoMode } = await getViewer({ requireAuth: false });
+  const { user, demoMode } = await getViewer({ requireAuth: true });
   const workspace = await getWorkspaceData(user, demoMode);
   const job = workspace.jobs.find((item) => item.id === jobId);
 

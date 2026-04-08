@@ -1,7 +1,17 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { MagicLinkForm } from "@/components/magic-link-form";
+import { getViewer } from "@/lib/auth";
+import { getWorkspaceData } from "@/lib/workspace";
 
-export default function SignInPage() {
+export default async function SignInPage() {
+  const { user, demoMode } = await getViewer({ requireAuth: false });
+  const workspace = await getWorkspaceData(user, demoMode);
+
+  if (!demoMode && user) {
+    redirect(workspace.profileComplete ? "/dashboard" : "/onboarding");
+  }
+
   return (
     <div className="site-shell hero-shell">
       <div className="hero-card hero-grid">

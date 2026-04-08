@@ -4,7 +4,7 @@ import { getViewer } from "@/lib/auth";
 import { getWorkspaceData } from "@/lib/workspace";
 
 export default async function ResumesPage() {
-  const { user, demoMode } = await getViewer({ requireAuth: false });
+  const { user, demoMode } = await getViewer({ requireAuth: true });
   const workspace = await getWorkspaceData(user, demoMode);
 
   return (
