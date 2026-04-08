@@ -12,7 +12,6 @@ export function AppShell({ title, subtitle, actions, children }) {
       <aside className="sidebar">
         <div className="brand-block">
           <p className="eyebrow">Mehak's Job Search Model</p>
-          <h1>Business-role recruiting OS</h1>
           <p>Browser-native workflow for scans, review, resume tailoring, and applications.</p>
         </div>
         <nav className="nav-stack">
