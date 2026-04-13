@@ -14,18 +14,29 @@ function newResume(index) {
   return {
     name: `Resume ${index + 1}`,
     roleFamily: "General business roles",
-    content: ""
+    content: "",
+    parseStatus: "idle",
+    parseMessage: "",
+    sourceFileName: ""
   };
 }
 
-export function OnboardingWizard() {
+function seedResume(index, values = {}) {
+  return {
+    ...newResume(index),
+    ...values
+  };
+}
+
+export function OnboardingWizard({ initialName = "", initialEmail = "" }) {
   const router = useRouter();
   const [stepIndex, setStepIndex] = useState(0);
-  const [email, setEmail] = useState("mehak@example.com");
+  const [email, setEmail] = useState(initialEmail);
   const [submitted, setSubmitted] = useState(false);
   const [submissionMessage, setSubmissionMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({
-    name: "Mehak Bhatia",
+    name: initialName,
     location: "San Francisco, CA",
     seniority: "MBA / Mid-Senior",
     targetFunctions: "Strategy & Operations, GTM / Revenue Operations, Program Management, Strategic Finance",
@@ -38,11 +49,11 @@ export function OnboardingWizard() {
     conceptMatches: "business planning, KPI ownership, stakeholder management, execution cadence, portfolio management"
   });
   const [resumes, setResumes] = useState([
-    {
+    seedResume(0, {
       name: "Strategy Resume",
       roleFamily: "Strategy & Operations",
-      content: "Paste your first resume here."
-    }
+      content: ""
+    })
   ]);
 
   const currentStep = stepDefinitions[stepIndex];
@@ -62,31 +73,78 @@ export function OnboardingWizard() {
   }
 
   function addResume() {
-    setResumes((current) => [...current, newResume(current.length)]);
+    setResumes((current) => [...current, seedResume(current.length)]);
   }
 
   function removeResume(index) {
     setResumes((current) => current.filter((_, resumeIndex) => resumeIndex !== index));
   }
 
+  function setResumeStatus(index, parseStatus, parseMessage = "", extra = {}) {
+    setResumes((current) =>
+      current.map((resume, resumeIndex) =>
+        resumeIndex === index ? { ...resume, parseStatus, parseMessage, ...extra } : resume
+      )
+    );
+  }
+
   async function importFile(index, file) {
     if (!file) return;
-    const text = await file.text();
-    updateResume(index, "content", text);
-    if (!resumes[index]?.name || resumes[index]?.name.startsWith("Resume")) {
-      updateResume(index, "name", file.name.replace(/\.[^.]+$/, ""));
+    setResumeStatus(index, "loading", `Parsing ${file.name}...`, { sourceFileName: file.name });
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch("/api/resumes/parse", {
+        method: "POST",
+        body: formData
+      });
+      const json = await response.json();
+
+      if (!response.ok) {
+        setResumeStatus(index, "error", json.error || "Could not parse that resume file.");
+        return;
+      }
+
+      updateResume(index, "content", json.parsedText || "");
+      if (!resumes[index]?.name || resumes[index]?.name.startsWith("Resume")) {
+        updateResume(index, "name", json.name || file.name.replace(/\.[^.]+$/, ""));
+      }
+      setResumeStatus(
+        index,
+        "success",
+        json.warnings?.length
+          ? `Parsed with ${json.warnings.length} warning${json.warnings.length === 1 ? "" : "s"}. Review the text below.`
+          : "Parsed successfully. Review and edit the extracted text below."
+      );
+    } catch (error) {
+      setResumeStatus(index, "error", error?.message || "Could not parse that resume file.");
     }
   }
 
   async function handleSubmit(event) {
     event.preventDefault();
+    const validResumes = resumes.filter((resume) => String(resume.content || "").trim());
+    if (!validResumes.length) {
+      setSubmitted(false);
+      setSubmissionMessage("Add at least one pasted or parsed resume before creating the workspace.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmissionMessage("");
     const response = await fetch("/api/onboarding", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...form,
         email,
-        resumes
+        resumes: validResumes.map((resume) => ({
+          name: resume.name,
+          roleFamily: resume.roleFamily,
+          content: resume.content
+        }))
       })
     });
     const json = await response.json();
@@ -97,11 +155,13 @@ export function OnboardingWizard() {
           ? "Demo workspace created."
           : `Workspace saved with ${json.resumesSaved || resumes.length} resumes. Redirecting to Analyze Roles...`
       );
+      setIsSubmitting(false);
       setTimeout(() => router.push("/dashboard"), 900);
       return;
     }
     setSubmitted(false);
     setSubmissionMessage(json.error || "Could not save onboarding.");
+    setIsSubmitting(false);
   }
 
   return (
@@ -219,15 +279,25 @@ export function OnboardingWizard() {
                     />
                   </label>
                   <label className="field field-full">
-                    <span>Upload a text-based resume file</span>
-                    <input type="file" accept=".txt,.md,.rtf" onChange={(event) => importFile(index, event.target.files?.[0])} />
+                    <span>Upload a .docx resume</span>
+                    <input type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={(event) => importFile(index, event.target.files?.[0])} />
                   </label>
+                  {resume.sourceFileName ? (
+                    <p className={resume.parseStatus === "error" ? "error-text" : resume.parseStatus === "success" ? "success-text" : ""}>
+                      {resume.parseMessage || `Uploaded ${resume.sourceFileName}`}
+                    </p>
+                  ) : resume.parseMessage ? (
+                    <p className={resume.parseStatus === "error" ? "error-text" : resume.parseStatus === "success" ? "success-text" : ""}>
+                      {resume.parseMessage}
+                    </p>
+                  ) : null}
                   <label className="field field-full">
-                    <span>Paste resume text</span>
+                    <span>Paste or edit resume text</span>
                     <textarea
                       rows="8"
                       value={resume.content}
                       onChange={(event) => updateResume(index, "content", event.target.value)}
+                      placeholder="Paste resume text here, or upload a .docx file and review the extracted text."
                     />
                   </label>
                 </div>
@@ -249,8 +319,8 @@ export function OnboardingWizard() {
                 Next step
               </button>
             ) : (
-              <button type="submit" className="button">
-                Create workspace
+              <button type="submit" className="button" disabled={isSubmitting}>
+                {isSubmitting ? "Creating workspace..." : "Create workspace"}
               </button>
             )}
           </div>

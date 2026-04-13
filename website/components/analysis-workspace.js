@@ -10,6 +10,7 @@ export function AnalysisWorkspace({ resumeVariants, initialRun, history }) {
   const [selectedResumeIds, setSelectedResumeIds] = useState(
     resumeVariants.filter((resume) => resume.active).map((resume) => resume.id)
   );
+  const [analysisMode, setAnalysisMode] = useState("comprehensive");
   const [urls, setUrls] = useState("");
   const [transientResumeName, setTransientResumeName] = useState("");
   const [transientResumeRoleFamily, setTransientResumeRoleFamily] = useState("");
@@ -37,6 +38,7 @@ export function AnalysisWorkspace({ resumeVariants, initialRun, history }) {
       body: JSON.stringify({
         resumeIds: selectedResumeIds,
         urls,
+        analysisMode,
         transientResumeName,
         transientResumeRoleFamily,
         transientResumeContent
@@ -61,9 +63,9 @@ export function AnalysisWorkspace({ resumeVariants, initialRun, history }) {
       <form className="card analysis-form" onSubmit={handleSubmit}>
         <div className="section-head">
           <div>
-            <p className="eyebrow">Analyze roles</p>
-            <h3>Compare multiple resumes against multiple job URLs</h3>
-            <p>Bring your stored resumes, add a one-off resume if needed, and get ATS plus HR-fit guidance in one run.</p>
+            <p className="eyebrow">Workspace home</p>
+            <h3>Choose resumes, paste role URLs, and decide what kind of analysis to run</h3>
+            <p>Use your stored resumes, add a one-off resume if needed, and run ATS-only, HR-fit-only, or comprehensive analysis.</p>
           </div>
           <button className="button" type="submit" disabled={status === "loading"}>
             {status === "loading" ? "Analyzing..." : "Analyze Roles"}
@@ -73,17 +75,55 @@ export function AnalysisWorkspace({ resumeVariants, initialRun, history }) {
         <div className="stack">
           <section className="card inner-card">
             <p className="eyebrow">Stored resumes</p>
-            <div className="checkbox-grid">
-              {availableResumes.map((resume) => (
-                <label key={resume.id} className="checkbox-card">
+            {availableResumes.length ? (
+              <div className="checkbox-grid">
+                {availableResumes.map((resume) => (
+                  <label key={resume.id} className="checkbox-card">
+                    <input
+                      type="checkbox"
+                      checked={selectedResumeIds.includes(resume.id)}
+                      onChange={() => toggleResume(resume.id)}
+                    />
+                    <div>
+                      <strong>{resume.name}</strong>
+                      <p>{resume.roleFamily}</p>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <div className="stack-tight">
+                <p>No resumes are stored yet. Create or refresh your workspace first.</p>
+                <div className="action-row">
+                  <Link href="/onboarding" className="button-secondary">
+                    Add Resumes
+                  </Link>
+                  <Link href="/resumes" className="text-link">
+                    Open Resume Manager
+                  </Link>
+                </div>
+              </div>
+            )}
+          </section>
+
+          <section className="card inner-card">
+            <p className="eyebrow">Analysis mode</p>
+            <div className="checkbox-grid mode-grid">
+              {[
+                { value: "ats", title: "ATS only", detail: "Focus on keyword and concept overlap." },
+                { value: "hr", title: "HR fit only", detail: "Focus on recruiter-style fit and narrative alignment." },
+                { value: "comprehensive", title: "Comprehensive", detail: "Return ATS, HR fit, and the broadest recommendation set." }
+              ].map((mode) => (
+                <label key={mode.value} className="checkbox-card">
                   <input
-                    type="checkbox"
-                    checked={selectedResumeIds.includes(resume.id)}
-                    onChange={() => toggleResume(resume.id)}
+                    type="radio"
+                    name="analysisMode"
+                    checked={analysisMode === mode.value}
+                    onChange={() => setAnalysisMode(mode.value)}
                   />
                   <div>
-                    <strong>{resume.name}</strong>
-                    <p>{resume.roleFamily}</p>
+                    <strong>{mode.title}</strong>
+                    <p>{mode.detail}</p>
                   </div>
                 </label>
               ))}

@@ -17,7 +17,7 @@ export default async function OnboardingPage() {
 
   return (
     <div className="site-shell hero-shell">
-      <OnboardingWizard />
+      <OnboardingWizard initialName={user?.name || ""} initialEmail={user?.email || ""} />
     </div>
   );
 }

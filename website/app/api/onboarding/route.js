@@ -10,5 +10,8 @@ export async function POST(request) {
   }
 
   const result = await saveOnboarding(user, body);
+  if (!result.ok) {
+    return Response.json(result, { status: 400 });
+  }
   return Response.json({ ok: true, demoMode, ...result });
 }

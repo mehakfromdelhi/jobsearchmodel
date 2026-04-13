@@ -17,10 +17,13 @@ export default async function DashboardPage() {
 
   return (
     <AppShell
-      title="Analyze Roles"
-      subtitle="Select stored resumes, add a one-off resume if needed, and compare them against one or many job URLs."
+      title="Workspace Home"
+      subtitle="Start from your stored resumes, choose an analysis mode, and compare them against one or many job URLs."
       actions={
         <>
+          <Link href="/onboarding" className="button-secondary">
+            Add Resumes
+          </Link>
           <Link href="/resumes" className="button-secondary">
             Manage Resumes
           </Link>

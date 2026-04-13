@@ -15,7 +15,7 @@ export async function getWorkspaceData(user, demoMode = false) {
   if (demoMode || !hasDatabase()) {
     return {
       user: appUser,
-      analysisStats: toAnalysisStats(demoAnalysisHistory),
+      analysisStats: toAnalysisStats(demoAnalysisHistory, demoResumeVariants.length),
       analysisHistory: demoAnalysisHistory,
       latestAnalysisRun,
       resumeVariants: demoResumeVariants,
@@ -27,7 +27,7 @@ export async function getWorkspaceData(user, demoMode = false) {
   if (!user) {
     return {
       user: null,
-      analysisStats: toAnalysisStats([]),
+      analysisStats: toAnalysisStats([], 0),
       analysisHistory: [],
       latestAnalysisRun: null,
       resumeVariants: [],
@@ -58,7 +58,7 @@ export async function getWorkspaceData(user, demoMode = false) {
         location: profile?.location || "",
         targetFunctions: preferences?.targetFunctions || []
       },
-      analysisStats: toAnalysisStats(normalizedHistory),
+      analysisStats: toAnalysisStats(normalizedHistory, resumeVariants.length),
       analysisHistory: normalizedHistory,
       latestAnalysisRun: normalizedHistory[0] || null,
       resumeVariants: resumeVariants.map((item) => ({
@@ -78,7 +78,7 @@ export async function getWorkspaceData(user, demoMode = false) {
     console.error("getWorkspaceData: falling back to empty workspace", error);
     return {
       user,
-      analysisStats: toAnalysisStats([]),
+      analysisStats: toAnalysisStats([], 0),
       analysisHistory: [],
       latestAnalysisRun: null,
       resumeVariants: [],
@@ -117,6 +117,13 @@ export async function saveOnboarding(user, payload) {
   const negativeKeywords = splitCsv(payload.negativeKeywords);
   const conceptMatches = splitCsv(payload.conceptMatches);
   const resumes = normalizeSubmittedResumes(payload);
+
+  if (!resumes.length) {
+    return {
+      ok: false,
+      error: "Add at least one valid resume before creating the workspace."
+    };
+  }
 
   await prisma.profile.upsert({
     where: { userId: dbUser.id },
@@ -195,6 +202,7 @@ export async function runRoleAnalysis(user, payload) {
 
   const prisma = await getPrisma();
   const dbUser = await ensureDatabaseUser(prisma, user);
+  const analysisMode = normalizeAnalysisMode(payload.analysisMode);
   const analysesToday = await prisma.analysisRun.count({
     where: {
       userId: dbUser.id,
@@ -242,7 +250,8 @@ export async function runRoleAnalysis(user, payload) {
     roles,
     resumes,
     preferences,
-    profile
+    profile,
+    analysisMode
   });
 
   const run = await prisma.analysisRun.create({
@@ -380,7 +389,7 @@ export async function createCoverLetter() {
   };
 }
 
-function buildAnalysisResults({ roles, resumes, preferences, profile }) {
+function buildAnalysisResults({ roles, resumes, preferences, profile, analysisMode = "comprehensive" }) {
   const normalizedPreferences = {
     targetFunctions: toArray(preferences?.targetFunctions),
     positiveKeywords: toArray(preferences?.positiveKeywords),
@@ -396,13 +405,13 @@ function buildAnalysisResults({ roles, resumes, preferences, profile }) {
 
   for (const role of roles) {
     for (const resume of resumes) {
-      pairs.push(scoreResumeRolePair(resume, role, normalizedPreferences));
+      pairs.push(scoreResumeRolePair(resume, role, normalizedPreferences, analysisMode));
     }
   }
 
   const rolesWithCounts = roles.map((role) => {
     const rolePairs = pairs.filter((pair) => pair.roleId === role.id);
-    const best = [...rolePairs].sort((a, b) => b.totalScore - a.totalScore)[0];
+    const best = [...rolePairs].sort((a, b) => scoreForMode(b, analysisMode) - scoreForMode(a, analysisMode))[0];
     return {
       ...role,
       atsMatchCount: rolePairs.filter((pair) => pair.atsScore >= ATS_GOOD_THRESHOLD).length,
@@ -414,8 +423,8 @@ function buildAnalysisResults({ roles, resumes, preferences, profile }) {
 
   const resumesWithCounts = resumes.map((resume) => {
     const resumePairs = pairs.filter((pair) => pair.resumeId === resume.id);
-    const strongest = [...resumePairs].sort((a, b) => b.totalScore - a.totalScore).slice(0, 3);
-    const weakest = [...resumePairs].sort((a, b) => a.totalScore - b.totalScore).slice(0, 2);
+    const strongest = [...resumePairs].sort((a, b) => scoreForMode(b, analysisMode) - scoreForMode(a, analysisMode)).slice(0, 3);
+    const weakest = [...resumePairs].sort((a, b) => scoreForMode(a, analysisMode) - scoreForMode(b, analysisMode)).slice(0, 2);
     return {
       id: resume.id,
       name: resume.name,
@@ -436,6 +445,7 @@ function buildAnalysisResults({ roles, resumes, preferences, profile }) {
   });
 
   return {
+    analysisMode,
     roles: rolesWithCounts,
     resumeInputs: resumes.map((resume) => ({
       id: resume.id,
@@ -448,7 +458,7 @@ function buildAnalysisResults({ roles, resumes, preferences, profile }) {
   };
 }
 
-function scoreResumeRolePair(resume, role, preferences) {
+function scoreResumeRolePair(resume, role, preferences, analysisMode = "comprehensive") {
   const resumeText = normalizeText(resume.content);
   const roleText = normalizeText([role.role, role.jdSummary, role.description, role.location].join(" "));
   const positiveKeywords = preferences.positiveKeywords.filter((keyword) => roleText.includes(normalizeText(keyword)));
@@ -519,7 +529,7 @@ function scoreResumeRolePair(resume, role, preferences) {
     atsScore,
     hrScore,
     totalScore: Math.round((atsScore + hrScore) / 2),
-    recommendation: classifyRecommendation(atsScore, hrScore),
+    recommendation: classifyRecommendation(atsScore, hrScore, analysisMode),
     strengths,
     gaps,
     redFlags,
@@ -594,6 +604,7 @@ function normalizeAnalysisRun(run) {
     submittedUrls: toArray(run.submittedUrls),
     includedResumeIds: toArray(run.includedResumeIds),
     transientResumeName: run.transientResumeName,
+    analysisMode: results.analysisMode || "comprehensive",
     results
   };
 }
@@ -761,7 +772,19 @@ function decodeHtmlEntities(value) {
     .replace(/&gt;/g, ">");
 }
 
-function classifyRecommendation(atsScore, hrScore) {
+function classifyRecommendation(atsScore, hrScore, analysisMode = "comprehensive") {
+  if (analysisMode === "ats") {
+    if (atsScore >= 80) return "Strong ATS fit";
+    if (atsScore >= 65) return "Stretch ATS fit";
+    if (atsScore >= 55) return "Weak ATS fit";
+    return "Low ATS fit";
+  }
+  if (analysisMode === "hr") {
+    if (hrScore >= 80) return "Strong HR fit";
+    if (hrScore >= 65) return "Stretch HR fit";
+    if (hrScore >= 55) return "Weak HR fit";
+    return "Low HR fit";
+  }
   if (atsScore >= 80 && hrScore >= 75) return "Strong fit";
   if (atsScore >= 65 && hrScore >= 60) return "Stretch but viable";
   if (atsScore >= 55 || hrScore >= 55) return "Weak fit";
@@ -769,20 +792,20 @@ function classifyRecommendation(atsScore, hrScore) {
 }
 
 function summarizeTopRecommendation(pairs) {
-  const strong = pairs.filter((pair) => pair.recommendation === "Strong fit").length;
-  const stretch = pairs.filter((pair) => pair.recommendation === "Stretch but viable").length;
+  const strong = pairs.filter((pair) => pair.recommendation.toLowerCase().includes("strong")).length;
+  const stretch = pairs.filter((pair) => pair.recommendation.toLowerCase().includes("stretch")).length;
   if (strong) return `${strong} strong-fit pair${strong === 1 ? "" : "s"}${stretch ? ` and ${stretch} stretch-fit pair${stretch === 1 ? "" : "s"}` : ""}`;
   if (stretch) return `${stretch} stretch-fit pair${stretch === 1 ? "" : "s"} found`;
   return "No strong matches yet";
 }
 
-function toAnalysisStats(history) {
+function toAnalysisStats(history, storedResumeCount = 0) {
   if (!history.length) {
     return [
       { label: "Analyses run", value: "0", detail: "No role comparisons yet" },
       { label: "ATS matches", value: "0", detail: "Pairs above ATS threshold" },
       { label: "HR matches", value: "0", detail: "Pairs above HR threshold" },
-      { label: "Resumes stored", value: "0", detail: "Ready for analysis" }
+      { label: "Resumes stored", value: String(storedResumeCount), detail: "Ready for analysis" }
     ];
   }
 
@@ -795,7 +818,7 @@ function toAnalysisStats(history) {
     { label: "Analyses run", value: String(history.length), detail: "Last 10 runs only" },
     { label: "ATS matches", value: String(totalAts), detail: "Strong keyword-aligned pairs" },
     { label: "HR matches", value: String(totalHr), detail: "Role-profile fit signals" },
-    { label: "Resumes in latest run", value: String(latestResumeCount), detail: "Compared in the newest analysis" }
+    { label: "Resumes stored", value: String(Math.max(storedResumeCount, latestResumeCount)), detail: "Available for future analysis" }
   ];
 }
 
@@ -856,4 +879,16 @@ function toTitleCase(value) {
 
 function toBullets(items) {
   return items.filter(Boolean).map((item) => `- ${item}`);
+}
+
+function normalizeAnalysisMode(value) {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (normalized === "ats" || normalized === "hr") return normalized;
+  return "comprehensive";
+}
+
+function scoreForMode(pair, analysisMode) {
+  if (analysisMode === "ats") return pair.atsScore;
+  if (analysisMode === "hr") return pair.hrScore;
+  return pair.totalScore;
 }

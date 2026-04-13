@@ -16,8 +16,9 @@ Working now:
 - Prisma database schema
 - invite-only beta gating
 - standard email/password auth flow
-- multi-resume onboarding
+- multi-resume onboarding with `.docx` parsing
 - multi-role analysis runs
+- per-run analysis mode selection: ATS, HR fit, or comprehensive
 - in-app revised resume output
 - `.docx` export for revised resumes
 
@@ -31,14 +32,16 @@ For the most current website notes, see [BETA_STATUS.md](./BETA_STATUS.md).
 ## Product workflow
 
 1. sign in
-2. upload or paste multiple resumes
-3. submit one or many job URLs
-4. extract JD content from those URLs
-5. compare every resume against every role
-6. review ATS and HR-fit scorecards
-7. generate a revised resume in-app only
-8. optionally download it as a basic `.docx`
-9. revisit the last 10 analysis runs in History
+2. upload one or more `.docx` resumes or paste resume text
+3. review the extracted text before creating the workspace
+4. create the workspace
+5. submit one or many job URLs
+6. choose ATS-only, HR-fit-only, or comprehensive analysis
+7. compare every resume against every role
+8. review ATS and HR-fit scorecards
+9. generate one revised resume draft per role in-app only
+10. optionally download drafts as basic `.docx` files
+11. revisit the last 10 analysis runs in History
 
 ## Zero-cost beta stack
 
@@ -52,7 +55,7 @@ For the most current website notes, see [BETA_STATUS.md](./BETA_STATUS.md).
 
 - landing page
 - sign-in and sign-up screens
-- multi-step onboarding UI
+- multi-step onboarding UI with `.docx` resume parsing
 - analysis workspace
 - history section
 - resume manager
@@ -65,7 +68,7 @@ For the most current website notes, see [BETA_STATUS.md](./BETA_STATUS.md).
 - real Supabase project credentials and Vercel env vars
 - production auth reliability and beta testing hardening
 - richer resume rewriting quality beyond the current heuristic draft
-- broader upload support beyond pasted text and text-based files
+- PDF upload support and OCR
 - optional external integrations if added later
 
 ## Run locally
