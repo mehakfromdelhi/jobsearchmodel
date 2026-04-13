@@ -15,14 +15,15 @@ Working now:
 - Supabase connection
 - Prisma database schema
 - invite-only beta gating
+- standard email/password auth flow
 - multi-resume onboarding
 - multi-role analysis runs
 - in-app revised resume output
 - `.docx` export for revised resumes
 
 Still being worked on:
-- production magic-link sign-in reliability
-- fallback auth flow for beta testers when email delivery is restricted
+- production auth reliability
+- password reset flow verification
 - complete end-to-end onboarding verification in production
 
 For the most current website notes, see [BETA_STATUS.md](./BETA_STATUS.md).
@@ -42,7 +43,7 @@ For the most current website notes, see [BETA_STATUS.md](./BETA_STATUS.md).
 ## Zero-cost beta stack
 
 - `Vercel Hobby` for hosting
-- `Supabase Free` for Postgres + magic-link auth
+- `Supabase Free` for Postgres + auth
 - no paid email or dashboard vendors
 - lightweight role analysis only
 - no dashboard queue or pipeline publishing flow
@@ -50,7 +51,7 @@ For the most current website notes, see [BETA_STATUS.md](./BETA_STATUS.md).
 ## Included
 
 - landing page
-- magic-link sign-in screen
+- sign-in and sign-up screens
 - multi-step onboarding UI
 - analysis workspace
 - history section

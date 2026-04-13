@@ -4,7 +4,7 @@ import { AuthForm } from "@/components/auth-form";
 import { getViewer } from "@/lib/auth";
 import { getWorkspaceData } from "@/lib/workspace";
 
-export default async function SignInPage() {
+export default async function SignUpPage() {
   const { user, demoMode } = await getViewer({ requireAuth: false });
   const workspace = await getWorkspaceData(user, demoMode);
 
@@ -16,21 +16,18 @@ export default async function SignInPage() {
     <div className="site-shell hero-shell">
       <div className="hero-card hero-grid">
         <section>
-          <p className="eyebrow">Account access</p>
-          <h2>Email and password for private recruiting workspaces</h2>
+          <p className="eyebrow">Create account</p>
+          <h2>Invite-only beta access with a standard password</h2>
           <p className="lede">
-            Create a normal account, sign in like any other website, and keep your role analyses, resume inputs, and history inside one private workspace.
+            If your email is included in the beta invite list, you can create an account here and start using the website without one-time login links.
           </p>
           <div className="hero-actions">
-            <Link href="/sign-up" className="button-secondary">
-              Create account
-            </Link>
-            <Link href="/dashboard" className="button-ghost">
-              Preview workspace
+            <Link href="/sign-in" className="button-secondary">
+              Already have an account?
             </Link>
           </div>
         </section>
-        <AuthForm mode="sign-in" />
+        <AuthForm mode="sign-up" />
       </div>
     </div>
   );

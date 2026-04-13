@@ -13,7 +13,7 @@ Current website status:
 - database schema is deployed
 - invite-only beta auth is enabled
 - multi-resume role analysis is implemented
-- sign-in and magic-link delivery are still being actively debugged for beta testing
+- standard email/password auth is implemented and being tested
 
 If you are cloning this repo, treat the website as an active beta rather than a finished product.
 

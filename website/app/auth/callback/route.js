@@ -8,7 +8,7 @@ export async function GET(request) {
   const code = url.searchParams.get("code");
   const tokenHash = url.searchParams.get("token_hash");
   const type = url.searchParams.get("type") || "email";
-  const next = url.searchParams.get("next") || "/dashboard";
+  const next = url.searchParams.get("next") || (type === "recovery" ? "/reset-password" : "/dashboard");
 
   if (!hasSupabase() || (!code && !tokenHash)) {
     return NextResponse.redirect(new URL("/sign-in", request.url));
@@ -33,6 +33,10 @@ export async function GET(request) {
 
   if (error || !data.user) {
     return NextResponse.redirect(new URL("/sign-in?error=auth_callback_failed", request.url));
+  }
+
+  if (type === "recovery") {
+    return NextResponse.redirect(new URL("/reset-password", request.url));
   }
 
   if (hasDatabase()) {

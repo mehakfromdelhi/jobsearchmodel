@@ -4,7 +4,7 @@ This app is now prepared for a free-tier beta with:
 
 - `Vercel Hobby`
 - `Supabase Free`
-- magic-link auth
+- standard email/password auth
 - manual scans only
 - website-first dashboard
 
@@ -21,11 +21,11 @@ As of now:
 - database connection is live
 - invite-only gating is live
 - multi-resume onboarding and role analysis are implemented
-- auth delivery and beta magic-link behavior are still under active debugging
+- production auth flow is still under active testing
 
 ## What has already been done in code
 
-- invite-only magic-link request route
+- invite-only account creation
 - onboarding save route
 - manual scan route with daily cap
 - DB-aware dashboard, resumes, settings, and job detail pages
@@ -37,7 +37,7 @@ As of now:
 These steps cannot be completed from inside the repo because they require ownership of your accounts:
 
 1. Create a Supabase project
-2. Enable email magic-link auth in Supabase
+2. Enable email/password auth in Supabase
 3. Copy the Supabase credentials into local and Vercel env vars
 4. Create a Vercel project connected to this repo
 5. Add the same env vars in Vercel
@@ -112,7 +112,7 @@ To stay within free-tier limits:
 ## Beta launch checklist
 
 - Supabase project created
-- magic-link auth enabled
+- email/password auth enabled
 - local `.env.local` created
 - Prisma pushed to Supabase
 - Vercel project created

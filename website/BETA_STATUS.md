@@ -34,8 +34,8 @@ Working now:
 - revised resumes are shown in-app instead of being saved locally
 
 Still being tested or debugged:
-- live magic-link sign-in flow
-- fallback beta sign-in link behavior when Supabase email delivery is restricted
+- live email/password sign-in flow
+- password reset behavior
 - end-to-end beta flow in production with real users
 
 ## What We Are Doing

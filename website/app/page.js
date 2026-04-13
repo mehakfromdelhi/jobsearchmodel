@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 const workflow = [
-  "Sign in with a magic link",
+  "Create an account or sign in with a password",
   "Upload or paste multiple resumes",
   "Submit one or many job URLs",
   "Review ATS and HR-fit scorecards",

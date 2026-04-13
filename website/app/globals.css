@@ -80,6 +80,12 @@ p, li { color: var(--muted); line-height: 1.65; }
   gap: 12px;
   flex-wrap: wrap;
 }
+.auth-links {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
 
 .action-stack {
   display: grid;
