@@ -179,12 +179,14 @@ export async function saveOnboarding(user, payload) {
     });
   }
 
+  const usedSlugs = new Set();
   for (const [index, resume] of resumes.entries()) {
+    const slug = uniqueResumeSlug(resume.name || `resume-${index + 1}`, usedSlugs, index);
     await prisma.resumeVariant.create({
       data: {
         userId: dbUser.id,
         name: resume.name,
-        slug: slugify(resume.name || `resume-${index + 1}`),
+        slug,
         intendedRoleFamily: resume.roleFamily || "General business roles",
         contentMarkdown: resume.content,
         isActive: index === 0
@@ -850,6 +852,20 @@ function slugify(value) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+function uniqueResumeSlug(name, usedSlugs, index) {
+  const base = slugify(name) || `resume-${index + 1}`;
+  let candidate = base;
+  let counter = 2;
+
+  while (usedSlugs.has(candidate)) {
+    candidate = `${base}-${counter}`;
+    counter += 1;
+  }
+
+  usedSlugs.add(candidate);
+  return candidate;
 }
 
 function startOfToday() {

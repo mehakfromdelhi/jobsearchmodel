@@ -134,34 +134,50 @@ export function OnboardingWizard({ initialName = "", initialEmail = "" }) {
 
     setIsSubmitting(true);
     setSubmissionMessage("");
-    const response = await fetch("/api/onboarding", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...form,
-        email,
-        resumes: validResumes.map((resume) => ({
-          name: resume.name,
-          roleFamily: resume.roleFamily,
-          content: resume.content
-        }))
-      })
-    });
-    const json = await response.json();
-    if (response.ok) {
-      setSubmitted(true);
-      setSubmissionMessage(
-        json.demoMode
-          ? "Demo workspace created."
-          : `Workspace saved with ${json.resumesSaved || resumes.length} resumes. Redirecting to Analyze Roles...`
-      );
+    try {
+      const response = await fetch("/api/onboarding", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...form,
+          email,
+          resumes: validResumes.map((resume) => ({
+            name: resume.name,
+            roleFamily: resume.roleFamily,
+            content: resume.content
+          }))
+        })
+      });
+
+      let json = {};
+      try {
+        json = await response.json();
+      } catch {
+        json = {};
+      }
+
+      if (response.ok) {
+        setSubmitted(true);
+        setSubmissionMessage(
+          json.demoMode
+            ? "Demo workspace created."
+            : `Workspace saved with ${json.resumesSaved || validResumes.length} resumes. Redirecting to Analyze Roles...`
+        );
+        setTimeout(() => {
+          router.push("/dashboard");
+          router.refresh();
+        }, 900);
+        return;
+      }
+
+      setSubmitted(false);
+      setSubmissionMessage(json.error || "Could not save onboarding.");
+    } catch (error) {
+      setSubmitted(false);
+      setSubmissionMessage(error?.message || "Something went wrong while creating the workspace.");
+    } finally {
       setIsSubmitting(false);
-      setTimeout(() => router.push("/dashboard"), 900);
-      return;
     }
-    setSubmitted(false);
-    setSubmissionMessage(json.error || "Could not save onboarding.");
-    setIsSubmitting(false);
   }
 
   return (
