@@ -15,6 +15,10 @@ Working now:
 - Supabase connection
 - Prisma database schema
 - invite-only beta gating
+- multi-resume onboarding
+- multi-role analysis runs
+- in-app revised resume output
+- `.docx` export for revised resumes
 
 Still being worked on:
 - production magic-link sign-in reliability
@@ -23,32 +27,45 @@ Still being worked on:
 
 For the most current website notes, see [BETA_STATUS.md](./BETA_STATUS.md).
 
+## Product workflow
+
+1. sign in
+2. upload or paste multiple resumes
+3. submit one or many job URLs
+4. extract JD content from those URLs
+5. compare every resume against every role
+6. review ATS and HR-fit scorecards
+7. generate a revised resume in-app only
+8. optionally download it as a basic `.docx`
+9. revisit the last 10 analysis runs in History
+
 ## Zero-cost beta stack
 
 - `Vercel Hobby` for hosting
 - `Supabase Free` for Postgres + magic-link auth
 - no paid email or dashboard vendors
-- manual scans only
-- website dashboard is the main workspace
+- lightweight role analysis only
+- no dashboard queue or pipeline publishing flow
 
 ## Included
 
 - landing page
 - magic-link sign-in screen
 - multi-step onboarding UI
-- dashboard home
-- job detail page
+- analysis workspace
+- history section
 - resume manager
-- settings and integrations page
-- Prisma schema for the future multi-user data model
+- settings and feedback page
+- basic Word export for revised resumes
+- Prisma schema for the website data model
 
 ## Not fully wired yet
 
 - real Supabase project credentials and Vercel env vars
-- production ATS scanning beyond the lightweight beta scan flow
-- recurring scans
-- Google Sheets and Notion integrations
-- richer AI generation backed by a model provider
+- production auth reliability and beta testing hardening
+- richer resume rewriting quality beyond the current heuristic draft
+- broader upload support beyond pasted text and text-based files
+- optional external integrations if added later
 
 ## Run locally
 

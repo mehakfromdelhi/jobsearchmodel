@@ -20,6 +20,7 @@ As of now:
 - production homepage works
 - database connection is live
 - invite-only gating is live
+- multi-resume onboarding and role analysis are implemented
 - auth delivery and beta magic-link behavior are still under active debugging
 
 ## What has already been done in code
@@ -128,9 +129,9 @@ The immediate goal is to make the live beta stable enough for invite-only tester
 The priority order is:
 1. auth works reliably
 2. onboarding completes
-3. dashboard opens
-4. scan runs
-5. tailoring flow works
+3. multi-resume role analysis runs
+4. in-app revised resume generation works
+5. `.docx` export works
 
 ## If you want the absolute next step
 

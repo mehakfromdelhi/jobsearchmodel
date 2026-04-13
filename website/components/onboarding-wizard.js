@@ -6,11 +6,17 @@ import { useRouter } from "next/navigation";
 const stepDefinitions = [
   { key: "profile", title: "Basic info" },
   { key: "targets", title: "Target roles" },
-  { key: "preferences", title: "Preferences" },
   { key: "matching", title: "ATS matching" },
-  { key: "resume", title: "Resume" },
-  { key: "integrations", title: "Dashboard" }
+  { key: "resumes", title: "Resumes" }
 ];
+
+function newResume(index) {
+  return {
+    name: `Resume ${index + 1}`,
+    roleFamily: "General business roles",
+    content: ""
+  };
+}
 
 export function OnboardingWizard() {
   const router = useRouter();
@@ -22,17 +28,22 @@ export function OnboardingWizard() {
     name: "Mehak Bhatia",
     location: "San Francisco, CA",
     seniority: "MBA / Mid-Senior",
-    targetFunctions: "Strategy & Operations, GTM / Revenue Operations, Program Management",
+    targetFunctions: "Strategy & Operations, GTM / Revenue Operations, Program Management, Strategic Finance",
     preferredLocations: "San Francisco, New York",
     includeRemote: "Yes",
     industries: "B2B SaaS, Healthtech, Fintech",
-    companies: "Together AI, SmithRx, Notion",
-    positiveKeywords: "strategy, operations, business operations, strategic finance, enablement",
+    companies: "Clay, Together AI, Notion",
+    positiveKeywords: "strategy, operations, business operations, strategic finance, enablement, capacity planning",
     negativeKeywords: "intern, junior, software engineer",
-    conceptMatches: "business planning, KPI ownership, stakeholder management, execution cadence",
-    resume: "Paste resume text or upload a file in the production implementation.",
-    dashboardPreference: "Google Sheets"
+    conceptMatches: "business planning, KPI ownership, stakeholder management, execution cadence, portfolio management"
   });
+  const [resumes, setResumes] = useState([
+    {
+      name: "Strategy Resume",
+      roleFamily: "Strategy & Operations",
+      content: "Paste your first resume here."
+    }
+  ]);
 
   const currentStep = stepDefinitions[stepIndex];
   const progress = useMemo(() => `${stepIndex + 1} / ${stepDefinitions.length}`, [stepIndex]);
@@ -44,12 +55,27 @@ export function OnboardingWizard() {
     }));
   }
 
-  function nextStep() {
-    setStepIndex((value) => Math.min(value + 1, stepDefinitions.length - 1));
+  function updateResume(index, field, value) {
+    setResumes((current) =>
+      current.map((resume, resumeIndex) => (resumeIndex === index ? { ...resume, [field]: value } : resume))
+    );
   }
 
-  function prevStep() {
-    setStepIndex((value) => Math.max(value - 1, 0));
+  function addResume() {
+    setResumes((current) => [...current, newResume(current.length)]);
+  }
+
+  function removeResume(index) {
+    setResumes((current) => current.filter((_, resumeIndex) => resumeIndex !== index));
+  }
+
+  async function importFile(index, file) {
+    if (!file) return;
+    const text = await file.text();
+    updateResume(index, "content", text);
+    if (!resumes[index]?.name || resumes[index]?.name.startsWith("Resume")) {
+      updateResume(index, "name", file.name.replace(/\.[^.]+$/, ""));
+    }
   }
 
   async function handleSubmit(event) {
@@ -59,13 +85,18 @@ export function OnboardingWizard() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...form,
-        email
+        email,
+        resumes
       })
     });
     const json = await response.json();
     if (response.ok) {
       setSubmitted(true);
-      setSubmissionMessage(json.demoMode ? "Demo workspace created." : "Workspace saved. Redirecting to dashboard...");
+      setSubmissionMessage(
+        json.demoMode
+          ? "Demo workspace created."
+          : `Workspace saved with ${json.resumesSaved || resumes.length} resumes. Redirecting to Analyze Roles...`
+      );
       setTimeout(() => router.push("/dashboard"), 900);
       return;
     }
@@ -77,8 +108,8 @@ export function OnboardingWizard() {
     <div className="wizard-layout">
       <div className="wizard-rail card">
         <p className="eyebrow">Onboarding</p>
-        <h3>Set up your recruiting workspace</h3>
-        <p>Short, browser-native onboarding replacing manual YAML edits.</p>
+        <h3>Set up your matching workspace</h3>
+        <p>Upload or paste multiple resumes now so later analysis can compare them across several roles at once.</p>
         <div className="step-list">
           {stepDefinitions.map((step, index) => (
             <div key={step.key} className={`step-chip ${index === stepIndex ? "active" : ""}`}>
@@ -132,11 +163,6 @@ export function OnboardingWizard() {
               <span>Include remote</span>
               <input name="includeRemote" value={form.includeRemote} onChange={updateField} />
             </label>
-          </div>
-        ) : null}
-
-        {currentStep.key === "preferences" ? (
-          <div className="field-grid">
             <label className="field">
               <span>Industries</span>
               <textarea name="industries" rows="4" value={form.industries} onChange={updateField} />
@@ -165,41 +191,61 @@ export function OnboardingWizard() {
           </div>
         ) : null}
 
-        {currentStep.key === "resume" ? (
-          <div className="field-grid">
-            <label className="field field-full">
-              <span>Resume paste or upload</span>
-              <textarea name="resume" rows="8" value={form.resume} onChange={updateField} />
-            </label>
-          </div>
-        ) : null}
-
-        {currentStep.key === "integrations" ? (
-          <div className="field-grid">
-            <label className="field">
-              <span>Dashboard preference</span>
-              <input name="dashboardPreference" value={form.dashboardPreference} onChange={updateField} />
-            </label>
-            <div className="card tinted-card">
-              <p className="eyebrow">Output</p>
-              <h4>On submit, create:</h4>
-              <ul>
-                <li>User profile</li>
-                <li>Matching preferences</li>
-                <li>Base resume</li>
-                <li>Starter search config</li>
-              </ul>
-            </div>
+        {currentStep.key === "resumes" ? (
+          <div className="stack">
+            {resumes.map((resume, index) => (
+              <div className="card inner-card" key={`${resume.name}-${index}`}>
+                <div className="section-head">
+                  <div>
+                    <p className="eyebrow">Resume {index + 1}</p>
+                    <h4>{resume.name || `Resume ${index + 1}`}</h4>
+                  </div>
+                  {resumes.length > 1 ? (
+                    <button type="button" className="button-ghost" onClick={() => removeResume(index)}>
+                      Remove
+                    </button>
+                  ) : null}
+                </div>
+                <div className="field-grid">
+                  <label className="field">
+                    <span>Name</span>
+                    <input value={resume.name} onChange={(event) => updateResume(index, "name", event.target.value)} />
+                  </label>
+                  <label className="field">
+                    <span>Role family</span>
+                    <input
+                      value={resume.roleFamily}
+                      onChange={(event) => updateResume(index, "roleFamily", event.target.value)}
+                    />
+                  </label>
+                  <label className="field field-full">
+                    <span>Upload a text-based resume file</span>
+                    <input type="file" accept=".txt,.md,.rtf" onChange={(event) => importFile(index, event.target.files?.[0])} />
+                  </label>
+                  <label className="field field-full">
+                    <span>Paste resume text</span>
+                    <textarea
+                      rows="8"
+                      value={resume.content}
+                      onChange={(event) => updateResume(index, "content", event.target.value)}
+                    />
+                  </label>
+                </div>
+              </div>
+            ))}
+            <button type="button" className="button-secondary" onClick={addResume}>
+              Add another resume
+            </button>
           </div>
         ) : null}
 
         <div className="wizard-footer">
-          <button type="button" className="button button-secondary" onClick={prevStep} disabled={stepIndex === 0}>
+          <button type="button" className="button button-secondary" onClick={() => setStepIndex((value) => Math.max(value - 1, 0))} disabled={stepIndex === 0}>
             Back
           </button>
           <div className="wizard-actions">
             {stepIndex < stepDefinitions.length - 1 ? (
-              <button type="button" className="button" onClick={nextStep}>
+              <button type="button" className="button" onClick={() => setStepIndex((value) => Math.min(value + 1, stepDefinitions.length - 1))}>
                 Next step
               </button>
             ) : (

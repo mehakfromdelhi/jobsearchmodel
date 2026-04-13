@@ -10,7 +10,7 @@ export default async function SettingsPage() {
   return (
     <AppShell
       title="Settings & Integrations"
-      subtitle="Profile, matching preferences, preferred locations, and dashboard publishing live here."
+      subtitle="Profile, ATS matching preferences, and beta feedback live here."
       actions={<button className="button">Save changes</button>}
     >
       <div className="settings-grid">
@@ -39,13 +39,9 @@ export default async function SettingsPage() {
 
         <section className="stack">
           <div className="card tinted-card">
-            <p className="eyebrow">Dashboard sync</p>
-            <h3>Personal dashboard first</h3>
-            <p>This beta skips Google Sheets and Notion so the website itself stays the primary recruiting workspace.</p>
-            <div className="stack">
-              <button className="button" disabled>Google Sheets deferred</button>
-              <button className="button-secondary" disabled>Notion deferred</button>
-            </div>
+            <p className="eyebrow">Current product scope</p>
+            <h3>Analysis first, no dashboard queues</h3>
+            <p>The website now focuses on multi-resume role matching, fit scorecards, and in-app resume revision instead of live pipeline management.</p>
           </div>
 
           <div className="card">

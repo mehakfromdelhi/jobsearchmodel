@@ -26,6 +26,7 @@ model User {
   dashboardConnections DashboardConnection[]
   magicLinkTokens      MagicLinkToken[]
   feedbackItems        Feedback[]
+  analysisRuns         AnalysisRun[]
 }
 
 model MagicLinkToken {
@@ -175,4 +176,23 @@ model Feedback {
   context   String?
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AnalysisRun {
+  id                  String   @id @default(cuid())
+  userId              String
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  submittedUrls       Json
+  includedResumeIds   Json
+  transientResumeName String?
+  roleCount           Int      @default(0)
+  resumeCount         Int      @default(0)
+  atsMatchCount       Int      @default(0)
+  hrMatchCount        Int      @default(0)
+  topRecommendation   String?
+  resultsJson         Json
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }

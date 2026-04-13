@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
 import { ResumeActivateButton } from "@/components/resume-actions";
 import { getViewer } from "@/lib/auth";
@@ -10,11 +11,12 @@ export default async function ResumesPage() {
   return (
     <AppShell
       title="Resume Manager"
-      subtitle="Manage the active default resume, role-family variants, and tailored drafts tied to jobs."
+      subtitle="Keep multiple role-family resumes ready for analysis. Revised resumes are shown in-app and not saved locally."
       actions={
         <>
-          <button className="button">Upload Resume</button>
-          <button className="button-secondary">Create New Variant</button>
+          <Link href="/onboarding" className="button">
+            Re-run onboarding
+          </Link>
         </>
       }
     >
@@ -22,8 +24,8 @@ export default async function ResumesPage() {
         <div className="section-head">
           <div>
             <p className="eyebrow">Variants</p>
-            <h3>Active and role-specific resumes</h3>
-            <p>First version supports one base resume, multiple role-family variants, and AI-generated tailored drafts.</p>
+            <h3>Stored resumes for multi-role comparison</h3>
+            <p>Select from these during analysis, or paste a new one-off resume directly into an analysis run.</p>
           </div>
         </div>
         <div className="table-wrap">
@@ -49,8 +51,7 @@ export default async function ResumesPage() {
                   <td>
                     <div className="inline-actions">
                       <ResumeActivateButton resumeId={variant.id} active={variant.active} />
-                      <button className="link-button">Edit</button>
-                      <button className="link-button">Duplicate</button>
+                      <button className="link-button" disabled>Analyze in next run</button>
                     </div>
                   </td>
                 </tr>

@@ -12,6 +12,7 @@ Current website status:
 - Supabase is connected
 - database schema is deployed
 - invite-only beta auth is enabled
+- multi-resume role analysis is implemented
 - sign-in and magic-link delivery are still being actively debugged for beta testing
 
 If you are cloning this repo, treat the website as an active beta rather than a finished product.
@@ -377,10 +378,11 @@ A browser-native product scaffold now lives in `website/`.
 Use it if you want to evolve the repo into:
 - a landing page
 - magic-link sign-in
-- onboarding flow
-- dashboard and job detail pages
+- onboarding flow with multiple resumes
+- multi-role analysis workspace
+- history pages for the last 10 runs
 - resume manager
-- settings and integrations
+- settings and feedback pages
 
 To run it locally:
 
@@ -393,13 +395,15 @@ npm run dev
 For the zero-cost beta version:
 - use `Vercel Hobby`
 - use `Supabase Free`
-- keep scans manual only
-- keep the website as the personal dashboard
+- keep the website focused on role analysis instead of scan dashboards
+- compare multiple resumes against multiple job URLs in one run
+- show revised resumes in-app and optionally export them as `.docx`
 - skip Google Sheets and Notion for now
 
 For the current live beta:
 - homepage is available at [https://jobsearchmodel.vercel.app](https://jobsearchmodel.vercel.app)
 - auth and invite flow are in active testing
+- the website workflow has shifted from dashboard queues to fit analysis and resume revision
 - see `website/README.md` and `website/DEPLOY_BETA.md` for the latest website-specific status
 
 ## Security Notes
