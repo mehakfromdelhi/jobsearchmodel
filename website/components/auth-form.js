@@ -19,43 +19,82 @@ export function AuthForm({ mode = "sign-in" }) {
     event.preventDefault();
     setState("loading");
     setMessage("");
-
-    const supabase = getSupabaseBrowserClient();
-    if (!supabase) {
-      setState("error");
-      setMessage("Supabase is not configured.");
-      return;
-    }
-
-    if (isSignUp) {
-      const signupResponse = await fetch("/api/auth/sign-up", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, name })
-      });
-      const signupJson = await signupResponse.json();
-      if (!signupResponse.ok) {
+    try {
+      const supabase = getSupabaseBrowserClient();
+      if (!supabase) {
         setState("error");
-        setMessage(signupJson.error || "Could not create the account.");
+        setMessage("Supabase is not configured.");
         return;
       }
-    }
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
+      if (isSignUp) {
+        const signupResponse = await fetch("/api/auth/sign-up", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password, name })
+        });
 
-    if (error) {
+        let signupJson = {};
+        try {
+          signupJson = await signupResponse.json();
+        } catch {
+          signupJson = {};
+        }
+
+        if (!signupResponse.ok) {
+          setState("error");
+          setMessage(signupJson.error || "Could not create the account.");
+          return;
+        }
+
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              full_name: name
+            }
+          }
+        });
+
+        if (error) {
+          setState("error");
+          setMessage(error.message || "Could not create the account.");
+          return;
+        }
+
+        if (data.session) {
+          setState("success");
+          setMessage("Account created. Redirecting...");
+          router.push("/dashboard");
+          router.refresh();
+          return;
+        }
+
+        setState("success");
+        setMessage("Account created. If email confirmation is enabled in Supabase, confirm your email first, then sign in.");
+        return;
+      }
+
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        setState("error");
+        setMessage(error.message || "Could not sign in.");
+        return;
+      }
+
+      setState("success");
+      setMessage("Signed in. Redirecting...");
+      router.push("/dashboard");
+      router.refresh();
+    } catch (error) {
       setState("error");
-      setMessage(error.message || "Could not sign in.");
-      return;
+      setMessage(error?.message || "Something went wrong while contacting Supabase.");
     }
-
-    setState("success");
-    setMessage(isSignUp ? "Account created. Redirecting..." : "Signed in. Redirecting...");
-    router.push("/dashboard");
-    router.refresh();
   }
 
   return (
