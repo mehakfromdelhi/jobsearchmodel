@@ -30,21 +30,33 @@ export async function getViewer({ requireAuth = false } = {}) {
     };
   }
 
-  const prisma = await getPrisma();
-  const dbUser = await prisma.user.upsert({
-    where: { email: authUser.email },
-    update: {
-      name: authUser.user_metadata?.full_name || authUser.email,
-      emailVerifiedAt: new Date(),
-      betaAccessGranted: true
-    },
-    create: {
-      email: authUser.email,
-      name: authUser.user_metadata?.full_name || authUser.email,
-      emailVerifiedAt: new Date(),
-      betaAccessGranted: true
-    }
-  });
+  try {
+    const prisma = await getPrisma();
+    const dbUser = await prisma.user.upsert({
+      where: { email: authUser.email },
+      update: {
+        name: authUser.user_metadata?.full_name || authUser.email,
+        emailVerifiedAt: new Date(),
+        betaAccessGranted: true
+      },
+      create: {
+        email: authUser.email,
+        name: authUser.user_metadata?.full_name || authUser.email,
+        emailVerifiedAt: new Date(),
+        betaAccessGranted: true
+      }
+    });
 
-  return { user: dbUser, demoMode: false };
+    return { user: dbUser, demoMode: false };
+  } catch (error) {
+    console.error("getViewer: falling back to auth user because database sync failed", error);
+    return {
+      user: {
+        id: authUser.id,
+        email: authUser.email,
+        name: authUser.user_metadata?.full_name || authUser.email
+      },
+      demoMode: false
+    };
+  }
 }

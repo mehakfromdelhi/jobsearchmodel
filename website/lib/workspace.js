@@ -36,41 +36,57 @@ export async function getWorkspaceData(user, demoMode = false) {
     };
   }
 
-  const prisma = await getPrisma();
-  const [profile, preferences, resumeVariants, analysisRuns] = await Promise.all([
-    prisma.profile.findUnique({ where: { userId: user.id } }),
-    prisma.matchingPreferences.findUnique({ where: { userId: user.id } }),
-    prisma.resumeVariant.findMany({ where: { userId: user.id }, orderBy: { updatedAt: "desc" } }),
-    prisma.analysisRun.findMany({
-      where: { userId: user.id },
-      orderBy: { createdAt: "desc" },
-      take: 10
-    })
-  ]);
+  try {
+    const prisma = await getPrisma();
+    const dbUser = await ensureDatabaseUser(prisma, user);
+    const [profile, preferences, resumeVariants, analysisRuns] = await Promise.all([
+      prisma.profile.findUnique({ where: { userId: dbUser.id } }),
+      prisma.matchingPreferences.findUnique({ where: { userId: dbUser.id } }),
+      prisma.resumeVariant.findMany({ where: { userId: dbUser.id }, orderBy: { updatedAt: "desc" } }),
+      prisma.analysisRun.findMany({
+        where: { userId: dbUser.id },
+        orderBy: { createdAt: "desc" },
+        take: 10
+      })
+    ]);
 
-  const normalizedHistory = analysisRuns.map(normalizeAnalysisRun);
+    const normalizedHistory = analysisRuns.map(normalizeAnalysisRun);
 
-  return {
-    user: {
-      ...user,
-      location: profile?.location || "",
-      targetFunctions: preferences?.targetFunctions || []
-    },
-    analysisStats: toAnalysisStats(normalizedHistory),
-    analysisHistory: normalizedHistory,
-    latestAnalysisRun: normalizedHistory[0] || null,
-    resumeVariants: resumeVariants.map((item) => ({
-      id: item.id,
-      name: item.name,
-      roleFamily: item.intendedRoleFamily || "General business roles",
-      active: item.isActive,
-      lastUpdated: new Date(item.updatedAt).toLocaleDateString(),
-      summary: item.isTailored ? "Stored tailored source resume." : "Saved resume variant.",
-      content: item.contentMarkdown
-    })),
-    profileComplete: Boolean(profile?.onboardingCompletedAt),
-    betaMode: false
-  };
+    return {
+      user: {
+        ...dbUser,
+        location: profile?.location || "",
+        targetFunctions: preferences?.targetFunctions || []
+      },
+      analysisStats: toAnalysisStats(normalizedHistory),
+      analysisHistory: normalizedHistory,
+      latestAnalysisRun: normalizedHistory[0] || null,
+      resumeVariants: resumeVariants.map((item) => ({
+        id: item.id,
+        name: item.name,
+        roleFamily: item.intendedRoleFamily || "General business roles",
+        active: item.isActive,
+        lastUpdated: new Date(item.updatedAt).toLocaleDateString(),
+        summary: item.isTailored ? "Stored tailored source resume." : "Saved resume variant.",
+        content: item.contentMarkdown
+      })),
+      profileComplete: Boolean(profile?.onboardingCompletedAt),
+      betaMode: false,
+      degradedMode: false
+    };
+  } catch (error) {
+    console.error("getWorkspaceData: falling back to empty workspace", error);
+    return {
+      user,
+      analysisStats: toAnalysisStats([]),
+      analysisHistory: [],
+      latestAnalysisRun: null,
+      resumeVariants: [],
+      profileComplete: false,
+      betaMode: false,
+      degradedMode: true
+    };
+  }
 }
 
 export async function getAnalysisRun(user, runId, demoMode = false) {
@@ -92,6 +108,7 @@ export async function saveOnboarding(user, payload) {
   }
 
   const prisma = await getPrisma();
+  const dbUser = await ensureDatabaseUser(prisma, user, payload.name);
   const targetFunctions = splitCsv(payload.targetFunctions);
   const preferredLocations = splitCsv(payload.preferredLocations);
   const industries = splitCsv(payload.industries);
@@ -101,16 +118,8 @@ export async function saveOnboarding(user, payload) {
   const conceptMatches = splitCsv(payload.conceptMatches);
   const resumes = normalizeSubmittedResumes(payload);
 
-  await prisma.user.update({
-    where: { id: user.id },
-    data: {
-      name: payload.name,
-      betaAccessGranted: true
-    }
-  });
-
   await prisma.profile.upsert({
-    where: { userId: user.id },
+    where: { userId: dbUser.id },
     update: {
       location: payload.location,
       targetSeniority: payload.seniority,
@@ -121,7 +130,7 @@ export async function saveOnboarding(user, payload) {
       headline: `${targetFunctions[0] || "Business-role"} candidate`
     },
     create: {
-      userId: user.id,
+      userId: dbUser.id,
       location: payload.location,
       targetSeniority: payload.seniority,
       industries,
@@ -133,7 +142,7 @@ export async function saveOnboarding(user, payload) {
   });
 
   await prisma.matchingPreferences.upsert({
-    where: { userId: user.id },
+    where: { userId: dbUser.id },
     update: {
       targetFunctions,
       preferredLocations,
@@ -143,7 +152,7 @@ export async function saveOnboarding(user, payload) {
       conceptMatches
     },
     create: {
-      userId: user.id,
+      userId: dbUser.id,
       targetFunctions,
       preferredLocations,
       includeRemote: /^y(es)?$/i.test(String(payload.includeRemote || "yes")),
@@ -154,19 +163,19 @@ export async function saveOnboarding(user, payload) {
   });
 
   const existingResumes = await prisma.resumeVariant.findMany({
-    where: { userId: user.id }
+    where: { userId: dbUser.id }
   });
 
   if (existingResumes.length) {
     await prisma.resumeVariant.deleteMany({
-      where: { userId: user.id }
+      where: { userId: dbUser.id }
     });
   }
 
   for (const [index, resume] of resumes.entries()) {
     await prisma.resumeVariant.create({
       data: {
-        userId: user.id,
+        userId: dbUser.id,
         name: resume.name,
         slug: slugify(resume.name || `resume-${index + 1}`),
         intendedRoleFamily: resume.roleFamily || "General business roles",
@@ -185,9 +194,10 @@ export async function runRoleAnalysis(user, payload) {
   }
 
   const prisma = await getPrisma();
+  const dbUser = await ensureDatabaseUser(prisma, user);
   const analysesToday = await prisma.analysisRun.count({
     where: {
-      userId: user.id,
+      userId: dbUser.id,
       createdAt: { gte: startOfToday() }
     }
   });
@@ -197,9 +207,9 @@ export async function runRoleAnalysis(user, payload) {
   }
 
   const [profile, preferences, storedResumes] = await Promise.all([
-    prisma.profile.findUnique({ where: { userId: user.id } }),
-    prisma.matchingPreferences.findUnique({ where: { userId: user.id } }),
-    prisma.resumeVariant.findMany({ where: { userId: user.id } })
+    prisma.profile.findUnique({ where: { userId: dbUser.id } }),
+    prisma.matchingPreferences.findUnique({ where: { userId: dbUser.id } }),
+    prisma.resumeVariant.findMany({ where: { userId: dbUser.id } })
   ]);
 
   const selectedResumeIds = uniqueValues(Array.isArray(payload.resumeIds) ? payload.resumeIds : []);
@@ -237,7 +247,7 @@ export async function runRoleAnalysis(user, payload) {
 
   const run = await prisma.analysisRun.create({
     data: {
-      userId: user.id,
+      userId: dbUser.id,
       submittedUrls,
       includedResumeIds: selectedResumeIds,
       transientResumeName: transientResume?.name || null,
@@ -250,7 +260,7 @@ export async function runRoleAnalysis(user, payload) {
     }
   });
 
-  await trimAnalysisHistory(prisma, user.id);
+  await trimAnalysisHistory(prisma, dbUser.id);
 
   return {
     ok: true,
@@ -304,8 +314,9 @@ export async function activateResume(user, resumeId) {
   if (!hasDatabase()) return { ok: true, demoMode: true };
 
   const prisma = await getPrisma();
+  const dbUser = await ensureDatabaseUser(prisma, user);
   const resume = await prisma.resumeVariant.findFirst({
-    where: { id: resumeId, userId: user.id }
+    where: { id: resumeId, userId: dbUser.id }
   });
 
   if (!resume) {
@@ -313,7 +324,7 @@ export async function activateResume(user, resumeId) {
   }
 
   await prisma.resumeVariant.updateMany({
-    where: { userId: user.id },
+    where: { userId: dbUser.id },
     data: { isActive: false }
   });
 
@@ -329,9 +340,10 @@ export async function saveFeedback(user, message, context = "beta-feedback") {
   if (!hasDatabase()) return { ok: true, demoMode: true };
 
   const prisma = await getPrisma();
+  const dbUser = await ensureDatabaseUser(prisma, user);
   await prisma.feedback.create({
     data: {
-      userId: user.id,
+      userId: dbUser.id,
       message,
       context
     }
@@ -584,6 +596,27 @@ function normalizeAnalysisRun(run) {
     transientResumeName: run.transientResumeName,
     results
   };
+}
+
+async function ensureDatabaseUser(prisma, user, preferredName = "") {
+  if (!user?.email) {
+    throw new Error("Authenticated user is missing an email address.");
+  }
+
+  return prisma.user.upsert({
+    where: { email: user.email },
+    update: {
+      name: preferredName || user.name || user.email,
+      betaAccessGranted: true,
+      emailVerifiedAt: new Date()
+    },
+    create: {
+      email: user.email,
+      name: preferredName || user.name || user.email,
+      betaAccessGranted: true,
+      emailVerifiedAt: new Date()
+    }
+  });
 }
 
 function normalizeSubmittedResumes(payload) {
