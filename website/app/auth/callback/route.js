@@ -6,14 +6,30 @@ import { getPrisma } from "@/lib/prisma";
 export async function GET(request) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
+  const tokenHash = url.searchParams.get("token_hash");
+  const type = url.searchParams.get("type") || "email";
   const next = url.searchParams.get("next") || "/dashboard";
 
-  if (!hasSupabase() || !code) {
+  if (!hasSupabase() || (!code && !tokenHash)) {
     return NextResponse.redirect(new URL("/sign-in", request.url));
   }
 
   const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+  let data;
+  let error;
+
+  if (code) {
+    const result = await supabase.auth.exchangeCodeForSession(code);
+    data = result.data;
+    error = result.error;
+  } else {
+    const result = await supabase.auth.verifyOtp({
+      token_hash: tokenHash,
+      type
+    });
+    data = result.data;
+    error = result.error;
+  }
 
   if (error || !data.user) {
     return NextResponse.redirect(new URL("/sign-in?error=auth_callback_failed", request.url));
