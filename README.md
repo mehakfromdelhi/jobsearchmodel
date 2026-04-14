@@ -9,6 +9,54 @@ A browser-native job-matching and resume-personalization product for business-ro
 
 This repo is the working product build for my job-search system. The current focus is the website experience: account creation, resume ingestion, role-fit analysis, and in-app resume revision.
 
+## Current Product Status
+
+Current build:
+- live beta on Vercel
+- account creation and sign-in
+- multi-resume onboarding
+- `.docx` resume parsing
+- workspace creation
+- ATS / HR / comprehensive analysis modes
+- in-app revised resume drafts
+- `.docx` export
+
+In progress:
+- production onboarding hardening
+- PDF support
+- deeper resume-rewrite quality
+- broader beta testing
+
+## Product Preview
+
+The clearest screens in the current beta are:
+- onboarding flow with profile, targets, ATS preferences, and resume upload
+- workspace home with resume selection, job URL input, and analysis mode selector
+- analysis results view with ATS fit, HR fit, and revised drafts
+- history view for the last 10 runs
+
+Live beta:
+- [https://jobsearchmodel.vercel.app](https://jobsearchmodel.vercel.app)
+
+## Product Architecture
+
+```mermaid
+flowchart TD
+    A["User signs in"] --> B["Onboarding"]
+    B --> C["Upload .docx or paste resume text"]
+    C --> D["Parse and review resume text"]
+    D --> E["Create workspace"]
+    E --> F["Workspace home"]
+    F --> G["Paste one or more job URLs"]
+    G --> H["Choose analysis mode"]
+    H --> I["JD extraction + fit scoring"]
+    I --> J["ATS fit + HR fit recommendations"]
+    J --> K["Best resume selected per role"]
+    K --> L["In-app revised draft"]
+    L --> M["Copy text or download .docx"]
+    J --> N["History (last 10 runs)"]
+```
+
 ## What This Product Is Trying To Do
 
 The goal is to make job search less manual and more decision-driven.

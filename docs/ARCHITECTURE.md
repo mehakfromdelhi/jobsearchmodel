@@ -1,110 +1,106 @@
 # Architecture
 
-## System Overview
+## Summary
 
-```
-                    ┌─────────────────────────────────┐
-                    │         Claude Code Agent        │
-                    │   (reads CLAUDE.md + modes/*.md) │
-                    └──────────┬──────────────────────┘
-                               │
-            ┌──────────────────┼──────────────────────┐
-            │                  │                       │
-     ┌──────▼──────┐   ┌──────▼──────┐   ┌───────────▼────────┐
-     │ Single Eval  │   │ Portal Scan │   │   Batch Process    │
-     │ (auto-pipe)  │   │  (scan.md)  │   │   (batch-runner)   │
-     └──────┬──────┘   └──────┬──────┘   └───────────┬────────┘
-            │                  │                       │
-            │           ┌──────▼──────┐          ┌────▼─────┐
-            │           │ pipeline.md │          │ N workers│
-            │           │ (URL inbox) │          │ (claude -p)
-            │           └─────────────┘          └────┬─────┘
-            │                                          │
-     ┌──────▼──────────────────────────────────────────▼──────┐
-     │                    Output Pipeline                      │
-     │  ┌──────────┐  ┌────────────┐  ┌───────────────────┐  │
-     │  │ Report.md│  │  PDF (HTML  │  │ Tracker TSV       │  │
-     │  │ (A-F eval)│  │  → Puppeteer)│  │ (merge-tracker)  │  │
-     │  └──────────┘  └────────────┘  └───────────────────┘  │
-     └────────────────────────────────────────────────────────┘
-                               │
-                    ┌──────────▼──────────┐
-                    │  data/applications.md │
-                    │  (canonical tracker)  │
-                    └──────────────────────┘
-```
+The product is now centered on the website in `website/`, not the older repo-first scan workflow.
 
-## Evaluation Flow (Single Offer)
+It is a browser-native system for:
+- user authentication
+- resume ingestion
+- workspace creation
+- multi-resume role analysis
+- in-app revised resume generation
+- recent-run history
 
-1. **Input**: User pastes JD text or URL
-2. **Extract**: Playwright/WebFetch extracts JD from URL
-3. **Classify**: Detect archetype (1 of 6 types)
-4. **Evaluate**: 6 blocks (A-F):
-   - A: Role summary
-   - B: CV match (gaps + mitigation)
-   - C: Level strategy
-   - D: Comp research (WebSearch)
-   - E: CV personalization plan
-   - F: Interview prep (STAR stories)
-5. **Score**: Weighted average across 10 dimensions (1-5)
-6. **Report**: Save as `reports/{num}-{company}-{date}.md`
-7. **PDF**: Generate ATS-optimized CV (`generate-pdf.mjs`)
-8. **Track**: Write TSV to `batch/tracker-additions/`, auto-merged
+## High-Level Flow
 
-## Batch Processing
-
-The batch system processes multiple offers in parallel:
-
-```
-batch-input.tsv    →  batch-runner.sh  →  N × claude -p workers
-(id, url, source)     (orchestrator)       (self-contained prompt)
-                           │
-                    batch-state.tsv
-                    (tracks progress)
+```mermaid
+flowchart TD
+    A["User signs in"] --> B["Onboarding"]
+    B --> C["Upload .docx or paste resume text"]
+    C --> D["Resume parsing API"]
+    D --> E["Review extracted text"]
+    E --> F["Create workspace"]
+    F --> G["Store profile + preferences + parsed resumes"]
+    G --> H["Workspace home"]
+    H --> I["Paste one or more job URLs"]
+    H --> J["Choose analysis mode"]
+    I --> K["Role analysis API"]
+    J --> K
+    K --> L["ATS and HR fit scoring"]
+    L --> M["Best resume selected per role"]
+    M --> N["Revised draft shown in app"]
+    N --> O["Optional .docx export"]
+    L --> P["History (last 10 runs)"]
 ```
 
-Each worker is a headless Claude instance (`claude -p`) that receives the full `batch-prompt.md` as context. Workers produce:
-- Report .md
-- PDF
-- Tracker TSV line
+## Main Subsystems
 
-The orchestrator manages parallelism, state, retries, and resume.
+### 1. Auth
 
-## Data Flow
+- `Supabase Auth`
+- email/password sign-up and sign-in
+- authenticated user session gates onboarding, workspace, history, and resumes
 
-```
-cv.md                    →  Evaluation context
-article-digest.md        →  Proof points for matching
-config/profile.yml       →  Candidate identity
-portals.yml              →  Scanner configuration
-templates/states.yml     →  Canonical status values
-templates/cv-template.html → PDF generation template
-```
+### 2. Onboarding
 
-## File Naming Conventions
+- collects profile, target roles, ATS keywords, and resumes
+- supports multiple resumes
+- supports `.docx` parsing plus manual text paste
+- saves parsed text only
 
-- Reports: `{###}-{company-slug}-{YYYY-MM-DD}.md` (3-digit zero-padded)
-- PDFs: `cv-candidate-{company-slug}-{YYYY-MM-DD}.pdf`
-- Tracker TSVs: `batch/tracker-additions/{id}.tsv`
+### 3. Workspace
 
-## Pipeline Integrity
+- main logged-in home
+- shows stored resumes
+- accepts one or many job URLs
+- lets the user choose:
+  - ATS only
+  - HR fit only
+  - comprehensive
 
-Scripts maintain data consistency:
+### 4. Analysis
 
-| Script | Purpose |
-|--------|---------|
-| `merge-tracker.mjs` | Merges batch TSV additions into applications.md |
-| `verify-pipeline.mjs` | Health check: statuses, duplicates, links |
-| `dedup-tracker.mjs` | Removes duplicate entries by company+role |
-| `normalize-statuses.mjs` | Maps status aliases to canonical values |
-| `cv-sync-check.mjs` | Validates setup consistency |
+- extracts JD content from submitted URLs
+- compares every selected resume against every role
+- computes ATS and HR fit
+- identifies best resume per role
 
-## Dashboard TUI
+### 5. Revised Drafts
 
-The `dashboard/` directory contains a standalone Go TUI application that visualizes the pipeline:
+- generates one in-app draft per role using the best matching resume
+- does not save rewritten files locally
+- supports copy and `.docx` export
 
-- Filter tabs: All, Evaluada, Aplicado, Entrevista, Top >=4, No Aplicar
-- Sort modes: Score, Date, Company, Status
-- Grouped/flat view
-- Lazy-loaded report previews
-- Inline status picker
+### 6. History
+
+- stores the last 10 runs
+- lets users revisit prior analyses and revised drafts
+
+## Storage Model
+
+The core persisted data is:
+- user
+- profile
+- matching preferences
+- resume variants
+- analysis runs
+- feedback
+
+The product currently stores:
+- parsed resume text
+- not the original uploaded source file
+
+## Current Boundaries
+
+Included:
+- website-based role matching
+- resume upload and parsing
+- role-fit scoring
+- revised resume drafts
+
+Deferred:
+- PDF support
+- OCR
+- broader job discovery workflows
+- external dashboard integrations as the main experience
