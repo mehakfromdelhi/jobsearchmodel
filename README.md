@@ -2,6 +2,41 @@
 
 A browser-native job-matching and resume-personalization product for business-role candidates.
 
+## Core Idea
+
+Before this became a website, I built this as an agent-driven job-search workflow for myself.
+
+The original flow was:
+- identify ATS keywords from a job description
+- do recruiter-style / HR fit research on the role
+- compare that role against my resume
+- identify the gaps in my resume
+- rewrite the resume more intentionally for that role
+
+That core agent workflow is still the heart of the product.
+
+This repo can still be used in a clone-and-run way by people who want to use the GitHub project directly, but the website is the public-friendly layer I’m building so that the same flow becomes easier to use without needing to understand the repo deeply.
+
+## Original Job Search Flow
+
+The underlying job-search logic is:
+
+1. Bring in a target job description or job URL.
+2. Identify the ATS keywords and concepts in that role.
+3. Do HR-style fit research on what the role is likely asking for.
+4. Compare those requirements against one or more resumes.
+5. Identify missing skills, weak framing, and positioning gaps.
+6. Recommend what should change in the resume.
+7. Generate a revised draft resume.
+
+That is the product logic I created first.
+
+The website exists to make that same flow:
+- more public-friendly
+- more user-friendly
+- easier to test with more people
+- easier to use without relying fully on a terminal workflow
+
 ## Live Beta
 
 - Website: [https://jobsearchmodel.vercel.app](https://jobsearchmodel.vercel.app)
@@ -73,6 +108,10 @@ the product helps a user:
 - compare those resumes against one or many job URLs
 - understand ATS fit and recruiter fit
 - generate a revised draft resume inside the app
+
+In other words:
+- the agent logic came first
+- the website is the usability layer built around that logic
 
 ## Jobs To Be Done
 
@@ -203,5 +242,7 @@ This repo is the product version of that idea:
 - ATS-aware
 - recruiter-aware
 - faster to personalize
+
+The website is not the whole idea by itself. It is the more public-facing version of a workflow I originally built through agent-driven job-search analysis, resume gap identification, and resume rewriting.
 
 If you are reviewing this repo, the clearest place to start is the live beta and the website app in `website/`.

@@ -2,6 +2,13 @@
 
 This is the active product surface for Mehak's Job Search Model.
 
+The website is the public-friendly layer built on top of the original agent-driven job-search workflow:
+- identify ATS keywords
+- assess HR / recruiter fit
+- compare the role against one or more resumes
+- identify gaps
+- generate a revised draft resume
+
 Live beta:
 - [https://jobsearchmodel.vercel.app](https://jobsearchmodel.vercel.app)
 
