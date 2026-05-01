@@ -1,0 +1,4 @@
+interface:
+  display_name: "Tailor Resume For Role"
+  short_description: "Match a resume to a role for ATS and recruiter fit, then create an editable Word draft."
+  default_prompt: "Use $tailor-resume-for-role when a user shares a job description and wants ATS analysis, human-fit analysis, a rewritten resume draft, and optionally a local Word document."
